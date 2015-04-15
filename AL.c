@@ -422,6 +422,7 @@ void Inf_OpSuma()
 void Inf_OpResta()
 {
     NroToken = OP_RESTA;
+    comAbierto--;
 }
 
 /* PRODUCTO ----------------------------------------------------------------- */

@@ -42,6 +42,4 @@ IF( (a==b) AND (b==c) ) 6 ENDIF
 IF( (a==b) OR (b==c) ) 6 ENDIF
 IF( NOT(a==b) ) 6 ENDIF
 
-
 IF a1==a2; a2:=a1+1; WHILE 1 --/ comentario /-- LET 2
-
