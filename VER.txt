@@ -1,0 +1,2 @@
+LINEA 345
+Ver apertura y cierre de contador de comentarios
