@@ -1,0 +1,46 @@
+DECLARE
+  (INT a:REAL,b:REAL,c:REAL,d:REAL,e:REAL)
+END DECLARE
+
+a:=1;
+b:=2;
+c:=2;
+d:=2;
+e:=2;
+
+LET a:3+2,b:2*2,c,d:4/2,E:6-2 DEFAULT a+b;
+
+/--
+
+IF( a==5 )
+THEN
+  PUT "OK";
+ELSE
+PUT "ERROR";
+ENDIF
+
+IF( B==4 )
+THEN
+  PUT "OK";
+ELSE
+PUT "ERROR";
+ENDIF
+
+IF( C==2 )
+THEN
+  PUT "OK";
+ELSE
+PUT "ERROR";
+ENDIF
+
+IF( D==4 )
+THEN
+  PUT "OK";
+ELSE
+PUT "ERROR";
+ENDIF
+
+--/
+
+
+END
