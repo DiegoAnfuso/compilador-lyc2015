@@ -416,6 +416,7 @@ void Inf_Asignacion()
 void Inf_OpSuma()
 {
     NroToken = OP_SUMA;
+    ungetc((int)caracter, input);
 }
 
 /* RESTA -------------------------------------------------------------------- */
@@ -423,17 +424,22 @@ void Inf_OpResta()
 {
     NroToken = OP_RESTA;
     comAbierto--;
+    ungetc((int)caracter, input);
 }
 
 /* PRODUCTO ----------------------------------------------------------------- */
 void Inf_OpProducto()
 {
+    limpiarToken();
+	token[TamToken]=caracter;
     NroToken = OP_MULTIPLI;
 }
 
 /* DIVISION ----------------------------------------------------------------- */
 void Inf_OpDivision()
 {
+    limpiarToken();
+	token[TamToken]=caracter;
     NroToken = OP_DIVISION;
     comAbierto=0;
 }
@@ -587,11 +593,12 @@ void Inf_SepLista()
 /* SEPARADOR DE LAS DOS PARTES DE UN LET ----------------------------- */
 void Inf_SepDosP()
 {
-    limpiarToken();
+    /*limpiarToken();
     TamToken=0;
-    token[TamToken]=caracter;
+    token[TamToken]=caracter;*/
 
     NroToken = SEP_DOSP;
+    ungetc((int)caracter, input);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -750,6 +757,9 @@ void mostrarToken()
             break;
         case PR_PUT:
             sprintf(linea," <PR_PUT         : %s>\n",token);
+            break;
+        case PR_DEFAULT:
+            sprintf(linea," <PR_DEFAULT     : %s>\n",token);
             break;
         case CTE_ENT:
              sprintf(linea,"< CTE ENT  : %s >\n", token);
@@ -968,7 +978,7 @@ int insertarTOS()
             }
         }
 
-        auxStr[strlen(token)-1]='\0';
+        auxStr[x]='\0';
     }
 
 
@@ -1134,15 +1144,19 @@ void agregarPalabrasReservadas()
     strcpy(TOS[TOStop].tipo, "PR");
     TOStop++;
 
-    strcpy(TOS[TOStop].nombre, "NOT");
-    strcpy(TOS[TOStop].tipo, "PR");
-    TOStop++;
-
     strcpy(TOS[TOStop].nombre, "GET");
     strcpy(TOS[TOStop].tipo, "PR");
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "PUT");
+    strcpy(TOS[TOStop].tipo, "PR");
+    TOStop++;
+
+    strcpy(TOS[TOStop].nombre, "NOT");
+    strcpy(TOS[TOStop].tipo, "PR");
+    TOStop++;
+
+    strcpy(TOS[TOStop].nombre, "DEFAULT");
     strcpy(TOS[TOStop].tipo, "PR");
     TOStop++;
 }
