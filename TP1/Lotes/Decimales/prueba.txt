@@ -1,0 +1,11 @@
+DECLARE
+  (a:REAL,b:REAL,c:REAL,suma:REAL,resta:REAL,division:REAL,producto:REAL)
+ENDDECLARE
+
+a:=1.;
+b:=2.;
+c:=.3;
+suma:=0.9+.1;
+resta:=3.-3.5;
+division:=5./.5;
+producto:=.50*.5;

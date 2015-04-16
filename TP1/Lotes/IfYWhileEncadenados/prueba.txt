@@ -1,0 +1,31 @@
+DECLARE
+		(k:INT, j:INT, cont:INT)
+ENDDECLARE
+	PUT "IFs y REPEATS";
+	id1:=1;
+
+
+	WHILE(i<=5) {
+
+		WHILE(j<=5) {
+			IF (id1==1)
+			THEN
+				PUT "IGUAL A 1";
+			ELSE
+				IF (id1==4)
+				THEN
+					PUT "IGUAL A 4";
+				ELSE
+					IF (id1==5)
+					THEN
+						PUT "IGUAL A 5";
+					ELSE
+						PUT "DIFERENTE";
+					ENDIF
+				ENDIF
+			ENDIF
+
+			i:=i+1;
+		END
+		j:=j+1;
+	END
