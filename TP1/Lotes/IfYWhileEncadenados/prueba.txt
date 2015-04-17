@@ -1,7 +1,7 @@
 DECLARE
 		(k:INT, j:INT, cont:INT)
 ENDDECLARE
-	PUT "IFs y REPEATS";
+	PUT "IFs y WHILE";
 	id1:=1;
 
 

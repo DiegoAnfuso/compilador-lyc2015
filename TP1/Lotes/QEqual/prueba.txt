@@ -13,7 +13,6 @@ e:=QEqual(a+b, [(d-3)*2,3,3]);
 
 d:=QEqual(2,2,2,2,2,1;);
 
-/--
 IF ( d == 4)
   THEN
     PUT "OK";
@@ -29,4 +28,3 @@ IF ( d == 1)
   ELSE
     PUT "ERROR";
 ENDIF
---/

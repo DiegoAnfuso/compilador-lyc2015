@@ -10,7 +10,7 @@ e:=2;
 
 LET a:3+2,b:2*2,c,d:4/2,E:6-2 DEFAULT a+b;
 
-/--
+--/
 
 IF( a==5 )
 THEN
@@ -40,7 +40,7 @@ ELSE
 PUT "ERROR";
 ENDIF
 
---/
+/--
 
 
 END
