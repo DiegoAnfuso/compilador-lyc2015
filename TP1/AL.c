@@ -72,39 +72,40 @@ int yylval;
 #define PR_PUT 17
 #define PR_NOT 18
 #define PR_DEFAULT 19
-#define CANTPR 20
+#define PR_THEN 20
+#define CANTPR 21
 
 
-#define ID 20
-#define CTE_ENT 21
-#define CTE_REAL 22
-#define CTE_STRING 23
-#define OP_PABRE 24
-#define OP_PCIERRA 25
-#define OP_OR 26
-#define OP_AND 27
-#define OP_NOT 28
-#define OP_MENOR 29
-#define OP_MENORIGUAL 30
-#define OP_MAYOR 31
-#define OP_MAYORIGUAL 32
-#define OP_IGUAL 33
-#define OP_SUMA 34
-#define OP_RESTA 35
-#define OP_MULTIPLI 36
-#define OP_DIVISION 37
-#define OP_CABRE 38
-#define OP_CCIERRA 39
-#define OP_ASIG 40
-#define OP_LLABRE 41
-#define OP_LLCIERRA 42
-#define OP_CONCAT 43
-#define SEP_DECIMAL 44
-#define SEP_SENT 45
-#define OP_TIPO 46
-#define SEP_LISTA 47
-#define OP_GUION 48
-#define SEP_DOSP 49
+#define ID 30
+#define CTE_ENT 31
+#define CTE_REAL 32
+#define CTE_STRING 33
+#define OP_PABRE 34
+#define OP_PCIERRA 35
+#define OP_OR 36
+#define OP_AND 37
+#define OP_NOT 38
+#define OP_MENOR 39
+#define OP_MENORIGUAL 40
+#define OP_MAYOR 41
+#define OP_MAYORIGUAL 42
+#define OP_IGUAL 43
+#define OP_SUMA 44
+#define OP_RESTA 45
+#define OP_MULTIPLI 46
+#define OP_DIVISION 47
+#define OP_CABRE 48
+#define OP_CCIERRA 49
+#define OP_ASIG 50
+#define OP_LLABRE 51
+#define OP_LLCIERRA 52
+#define OP_CONCAT 53
+#define SEP_DECIMAL 54
+#define SEP_SENT 55
+#define OP_TIPO 56
+#define SEP_LISTA 57
+#define OP_GUION 58
+#define SEP_DOSP 59
 
 /* -------------------------------------------------------------------------- */
 /*                           DECLARACION PROTOTIPOS                           */
@@ -772,6 +773,9 @@ void mostrarToken()
         case PR_DEFAULT:
             sprintf(linea," <PR_DEFAULT     : %s>\n",token);
             break;
+        case PR_THEN:
+            sprintf(linea," <PR_THEN     : %s>\n",token);
+            break;
         case CTE_ENT:
              sprintf(linea,"< CTE ENT  : %s >\n", token);
              break;
@@ -953,7 +957,7 @@ int leerColumna(char caracter)
             return EOF;
             break;
         default:
-            return 25;
+            return 24;
             break;
 	}
 }
@@ -1168,6 +1172,10 @@ void agregarPalabrasReservadas()
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "DEFAULT");
+    strcpy(TOS[TOStop].tipo, "PR");
+    TOStop++;
+
+    strcpy(TOS[TOStop].nombre, "THEN");
     strcpy(TOS[TOStop].tipo, "PR");
     TOStop++;
 }
