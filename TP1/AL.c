@@ -47,8 +47,8 @@ int yylval;
 
 #define NV -1  //ESTADO DE CARACTER NO V?LIDO
 
-//#define USHRT_MAX   65535
-//#define FLT_MAX     3.40282347e+38F
+#define INT_MAX   65535
+#define FLT_MAX     3.40282347e+38F
 //#define FLT_PREC    18
 //DEFINES TEMPORALES
 
@@ -248,14 +248,14 @@ void Inf_Cte()
 {
     if (NroToken==CTE_ENT)
     {
-        /*int cte = atoi(token);
-        if ( (strlen(token)>5) || (cte > USHRT_MAX) )
+        long cte = atol(token);
+        if (cte > INT_MAX)
         {
             printf("\n ERROR: # Se excede el rango para un ENTERO. \n");
             printf("\n - Analisis Lexico INTERRUMPIDO - \n");
             printf("\n - leido: %s - actual: %c", token, caracter);
             exit(1);
-        }*/
+        }
     }
 
     if (NroToken==CTE_REAL)
@@ -282,7 +282,7 @@ void Inf_Cte()
             printf("\n ERROR: # Se excede el rango de presicion para un REAL. \n");
             printf("\n - Analisis Lexico INTERRUMPIDO - \n");
             exit(1);
-        }
+        }*/
 
         double cte = atof(token);
 
@@ -291,7 +291,7 @@ void Inf_Cte()
             printf("\n ERROR: # Se excede el rango para un REAL. \n");
             printf("\n - Analisis Lexico INTERRUMPIDO - \n");
             exit(1);
-        }*/
+        }
 
     }
 
