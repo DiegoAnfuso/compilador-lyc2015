@@ -83,9 +83,6 @@ int yylval;
 #define CTE_STRING 33
 #define OP_PABRE 34
 #define OP_PCIERRA 35
-#define OP_OR 36
-#define OP_AND 37
-#define OP_NOT 38
 #define OP_MENOR 39
 #define OP_MENORIGUAL 40
 #define OP_MAYOR 41
@@ -807,14 +804,8 @@ void mostrarToken()
         case OP_PCIERRA:
              sprintf(linea,"< CIERR PAR: %s >\n", token);
              break;
-        case OP_OR:
-             sprintf(linea,"< OP_OR    : %s >\n", token);
-             break;
-        case OP_AND:
-             sprintf(linea,"< OP_AND   : %s >\n", token);
-             break;
-        case OP_NOT:
-             sprintf(linea,"< OP_NOT   : %s >\n", token);
+        case PR_NOT:
+             sprintf(linea,"< PR_NOT   : %s >\n", token);
              break;
         case OP_MENOR:
              sprintf(linea,"< OP_MENOR : %s >\n", token);
