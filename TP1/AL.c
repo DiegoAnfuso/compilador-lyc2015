@@ -710,7 +710,9 @@ void leerCaracter()
 void mostrarToken()
 {
     char linea[100];
-
+    int j;
+    int i;
+    char auxStr[200];
     switch(NroToken)
     {
         case ID:
@@ -783,7 +785,19 @@ void mostrarToken()
              sprintf(linea,"< CTE REAL : %s >\n", token);
              break;
         case CTE_STRING:
-             sprintf(linea,"< CTE_STR  : %s >\n", token);
+             i=0;
+             strcpy(auxStr," ");
+             for (j=0;j< strlen(token);j++)
+             {
+                 auxStr[i]=token[j];
+                 if(token[j]=='%')
+                 {
+                     auxStr[++i]= token[j];
+                 }
+                 i++;
+             }
+             auxStr[i]='\0';
+             sprintf(linea,"< CTE_STR  : %s >\n", auxStr);
              break;
         case OP_PABRE:
              sprintf(linea,"< ABRE PAR : %s >\n", token);
