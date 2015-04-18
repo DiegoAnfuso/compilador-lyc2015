@@ -51,6 +51,7 @@ int yylval;
 #define FLT_MAX     3.40282347e+38F
 //#define FLT_PREC    18
 //DEFINES TEMPORALES
+#define COMENTARIO -2
 
 #define PR_DECLARE 0
 #define PR_ENDDECLARE 1
@@ -344,6 +345,7 @@ void Inf_CteStr()
 /* COMENTARIOS -------------------------------------------------------------- */
 void Iniciar_Com()
 {
+    NroToken = COMENTARIO;
     limpiarToken();
 	token[TamToken]=caracter;
 	comAbierto++;
