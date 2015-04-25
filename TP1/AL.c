@@ -47,8 +47,9 @@ int yylval;
 
 #define NV -1  //ESTADO DE CARACTER NO V?LIDO
 
-#define INT_MAX   65535
+#define INT_MAX     65535
 #define FLT_MAX     3.40282347e+38F
+#define FLT_MIN     1.4e-45F
 //#define FLT_PREC    18
 //DEFINES TEMPORALES
 #define COMENTARIO -2
@@ -290,6 +291,12 @@ void Inf_Cte()
             printf("\n - Analisis Lexico INTERRUMPIDO - \n");
             exit(1);
         }
+        if (cte < FLT_MIN)
+        {
+            printf("\n ERROR: # Se excede el rango para un REAL. \n");
+            printf("\n - Analisis Lexico INTERRUMPIDO - \n");
+            exit(1);
+        }
 
     }
 
@@ -385,6 +392,8 @@ void Nada()
 /* CARACTER NO VALIDO ------------------------------------------------------- */
 void Caract_No_Val () //REVISAR MENSAJES DE ERROR
 {
+    printf("\n - ERROR: Caracter no válido \n");
+
     if(strcmp(token,":")==0)
         printf("\n - ERROR: Se esperaba = \n");
 
