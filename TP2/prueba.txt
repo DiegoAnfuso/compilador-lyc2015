@@ -1,0 +1,5 @@
+i := 8;
+
+while(i < 10) begin
+	i:= i + 1;
+end
