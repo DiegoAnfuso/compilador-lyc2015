@@ -653,6 +653,7 @@ struct tablaDeSimbolo
     char tipo  [11];
     char valor [100];
     char ren   [31];
+	int  token;
     int longitud;
 };
 
@@ -1119,7 +1120,7 @@ int esPalabraReservada()
     {
         if (strcmp(TOS[i].nombre,token)==0) // strcmpi lo hacia sin diferenciar Mayus/Minus
         {
-            return i;
+            return TOS[i].token;
         }
     }
 
@@ -1134,86 +1135,107 @@ void agregarPalabrasReservadas()
     TOStop=0;
     strcpy(TOS[TOStop].nombre, "DECLARE");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_DECLARE;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "ENDDECLARE");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_ENDDECLARE;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "INT");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_INT;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "REAL");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_REAL;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "STRING");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_STRING;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "CONST");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_CONST;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "WHILE");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_WHILE;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "LET");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_LET;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "IF");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_IF;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "QEqual");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_QEQUAL;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "ELSE");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_ELSE;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "ENDIF");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_ENDIF;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "BEGIN");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_BEGIN;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "END");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_END;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "AND");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_AND;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "OR");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_OR;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "GET");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_GET;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "PUT");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_PUT;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "NOT");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_NOT;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "DEFAULT");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_DEFAULT;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "THEN");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_THEN;
     TOStop++;
 }
 
@@ -1281,12 +1303,12 @@ int yylex() //FUNCION  QUE LEE HASTA FINAL DE TOKEN O EOF
 
                 if (estado == 0)
                     return EOF;
-				printf("\nToken %d", NroToken);
+				printf("\nToken %d - %s", NroToken, token);
                 return NroToken;
 		    }
 		}
     }
-	printf("\nToken %d", NroToken);
+	printf("\nToken %d - %s", NroToken, token);
     return NroToken;
 }
 

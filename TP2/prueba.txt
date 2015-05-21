@@ -1,5 +1,7 @@
 i := 8;
-
-WHILE(i < 10) BEGIN
+i := 8 + d;
+jota := (3 * 4) + 5;
+IF(i < 10) 
 	i:= i + 1;
 END
+
