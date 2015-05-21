@@ -52,7 +52,7 @@ declaraciones : declaracion |
 				declaraciones SEP_LISTA declaracion
 ;
 
-declaracion : ID SEP_DOSP tipo_variable
+declaracion : ID SEP_DOSP tipo_variable { printf("\nDeclaracion de variable\n"); }
 ;
 
 tipo_variable : PR_STRING | PR_INT | PR_REAL
@@ -72,31 +72,31 @@ sentencia : asignacion SEP_SENT |
 			let SEP_SENT
 ;
 
-asignacion : ID OP_ASIG expresion |
+asignacion : ID OP_ASIG expresion { printf("\nAsignacion\n"); }|
 			 ID OP_ASIG concatenacion |
 			 ID OP_ASIG qequal
 ;
 
-concatenacion : cadena OP_CONCAT cadena
+concatenacion : cadena OP_CONCAT cadena { printf("\nConcatenacion\n"); }
 ;
 cadena : ID | CTE_STRING
 ;
 
-decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias PR_ENDIF |
-		   PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias PR_ELSE sentencias PR_ENDIF
+decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias PR_ENDIF { printf("\nSentencia IF\n"); }|
+		   PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias PR_ELSE sentencias PR_ENDIF { printf("\nSentencia IF con ELSE\n"); }
 ;		   
 
 condicion : cond_simple | cond_multiple
 ;
 
-cond_simple : comparacion
+cond_simple : comparacion { printf("\nCondicion simple\n"); }
 ;
 
-cond_multiple : OP_PABRE cond_simple op_logico cond_simple OP_PCIERRA |
-				PR_NOT OP_PABRE comparacion OP_PCIERRA
+cond_multiple : OP_PABRE cond_simple op_logico cond_simple OP_PCIERRA { printf("\nCondicion multiple\n"); }|
+				PR_NOT OP_PABRE comparacion OP_PCIERRA { printf("\nCondicion multiple\n"); }
 ;
 
-comparacion : expresion comparador expresion
+comparacion : expresion comparador expresion { printf("\nComparacion\n"); }
 ;
 
 comparador :  OP_MAYORIGUAL | OP_MAYOR | OP_MENORIGUAL | OP_MENOR | OP_IGUAL
@@ -105,25 +105,25 @@ comparador :  OP_MAYORIGUAL | OP_MAYOR | OP_MENORIGUAL | OP_MENOR | OP_IGUAL
 op_logico : PR_AND | PR_OR
 ;
 
-iteracion: PR_WHILE OP_PABRE condicion OP_PCIERRA sentencias PR_END
+iteracion: PR_WHILE OP_PABRE condicion OP_PCIERRA sentencias PR_END { printf("\nIteracion WHILE\n"); }
 ;
 
-entrada: PR_GET ID
+entrada: PR_GET ID  {printf("\nLectura de entrada\n");}
 ;
 
-salida: PR_PUT ID | PR_PUT CTE_STRING
+salida: PR_PUT ID {printf("\nEscritura de identificador\n"); }| PR_PUT CTE_STRING {printf("\nEscritura de constante string\n"); }
 ;
 
 cte : CTE_ENT | CTE_STRING | CTE_REAL
 ;
 
-expresion : expresion OP_SUMA termino |
-			expresion OP_RESTA termino |
+expresion : expresion OP_SUMA termino { printf("\nSuma\n"); } |
+			expresion OP_RESTA termino { printf("\nResta\n"); }|
 			termino
 ;
 
-termino : termino OP_MULTIPLI factor |
-			termino OP_DIVISION factor |
+termino : termino OP_MULTIPLI factor { printf("\nMultiplicacion\n"); }|
+			termino OP_DIVISION factor { printf("\nDivision\n"); }|
 			factor
 ;
 
@@ -132,15 +132,15 @@ factor : OP_PABRE expresion OP_PCIERRA |
 		cte
 ;
 
-qequal : PR_QEQUAL OP_PABRE expresion SEP_LISTA OP_CABRE lista_expresiones OP_CCIERRA SEP_LISTA OP_PCIERRA
+qequal : PR_QEQUAL OP_PABRE expresion SEP_LISTA OP_CABRE lista_expresiones OP_CCIERRA OP_PCIERRA { printf("\nQequal\n"); }
 ;
 lista_expresiones : expresion | lista_expresiones SEP_LISTA expresion
 ;
 
-let : PR_LET lista_let SEP_LISTA PR_DEFAULT asig_let
+let : PR_LET lista_let PR_DEFAULT expresion { printf("\nLET\n"); }
 ;
 
-asig_let : ID OP_ASIG expresion
+asig_let : ID SEP_DOSP expresion | ID
 ;
 lista_let : asig_let | lista_let SEP_LISTA asig_let
 ;
@@ -738,6 +738,7 @@ struct tablaDeSimbolo
     char tipo  [11];
     char valor [100];
     char ren   [31];
+	int  token;
     int longitud;
 };
 
@@ -1204,7 +1205,7 @@ int esPalabraReservada()
     {
         if (strcmp(TOS[i].nombre,token)==0) // strcmpi lo hacia sin diferenciar Mayus/Minus
         {
-            return i;
+            return TOS[i].token;
         }
     }
 
@@ -1219,86 +1220,107 @@ void agregarPalabrasReservadas()
     TOStop=0;
     strcpy(TOS[TOStop].nombre, "DECLARE");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_DECLARE;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "ENDDECLARE");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_ENDDECLARE;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "INT");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_INT;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "REAL");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_REAL;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "STRING");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_STRING;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "CONST");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_CONST;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "WHILE");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_WHILE;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "LET");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_LET;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "IF");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_IF;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "QEqual");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_QEQUAL;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "ELSE");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_ELSE;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "ENDIF");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_ENDIF;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "BEGIN");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_BEGIN;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "END");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_END;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "AND");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_AND;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "OR");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_OR;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "GET");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_GET;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "PUT");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_PUT;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "NOT");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_NOT;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "DEFAULT");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_DEFAULT;
     TOStop++;
 
     strcpy(TOS[TOStop].nombre, "THEN");
     strcpy(TOS[TOStop].tipo, "PR");
+	TOS[TOStop].token = PR_THEN;
     TOStop++;
 }
 
@@ -1366,12 +1388,12 @@ int yylex() //FUNCION  QUE LEE HASTA FINAL DE TOKEN O EOF
 
                 if (estado == 0)
                     return EOF;
-
+				printf("\nToken %d - %s", NroToken, token);
                 return NroToken;
 		    }
 		}
     }
-
+	printf("\nToken %d - %s", NroToken, token);
     return NroToken;
 }
 
