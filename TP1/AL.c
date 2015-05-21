@@ -392,7 +392,7 @@ void Nada()
 /* CARACTER NO VALIDO ------------------------------------------------------- */
 void Caract_No_Val () //REVISAR MENSAJES DE ERROR
 {
-    printf("\n - ERROR: Caracter no válido \n");
+    printf("\n - ERROR: Caracter no valido \n");
 
     if(strcmp(token,":")==0)
         printf("\n - ERROR: Se esperaba = \n");

@@ -1,5 +1,5 @@
 i := 8;
 
-while(i < 10) begin
+WHILE(i < 10) BEGIN
 	i:= i + 1;
-end
+END
