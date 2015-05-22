@@ -1,0 +1,11 @@
+PUT "PRUEBA";
+--/PRINT ("comentario simple")/--
+
+--/ // // / / // / // / // ** ------ --/PRINT ("comentario doble")/--
+-
+--
+-
+---
+-
+--- // // / / / / / / // /
+/--
