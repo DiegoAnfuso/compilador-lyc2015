@@ -40,7 +40,7 @@ Villaverde, Leonel
 %left  OP_PCIERRA OP_CCIERRA OP_LLCIERRA
 
 %%
-programa_principal : programa { printf("\nCOMPILACIÓN EXITOSA!\n"); }
+programa_principal : programa { printf("\nCOMPILACION EXITOSA!\n"); }
 ;
 
 programa : declaraciones |
@@ -219,6 +219,7 @@ void Caract_No_Val();
 void Fin_Com();
 void Fin_Com_N2();
 void Inciar_CteStr();
+void Inc_NroLinea();
 void Inf_Asignacion();
 void Inf_Cte();
 void Inf_CteStr();
@@ -278,6 +279,11 @@ void cerrarCodigoFuente()
         getch();
         exit(1);
     }
+}
+
+void Inc_NroLinea()
+{
+    nroLinea++;
 }
 
 /* IDENTIFICADORES ---------------------------------------------------------- */
@@ -493,6 +499,8 @@ void Nada()
     TamToken++;
     token[TamToken]=caracter;
     //limpiarToken();
+	if(caracter == '\n')
+		Inc_NroLinea();
 }
 
 /* CARACTER NO VALIDO ------------------------------------------------------- */
@@ -748,7 +756,7 @@ struct tablaDeSimbolo TOS[TAMMAX];
 void (*proceso[][25])() = {
 //			0|					1|					2|					3|					4|					5|					6|					7|						8|						9|					10|						11|					12|						13|					14|					15|					16|					17|					18|					19|					20|						21|					22|					23|					24|
 //			+|					-|					*|					/|					Let|				Dig|				=|					<|						>|						"|					.|						[|					]|						{|					}|					(|					)|					,|					_|					;|					:|				        tab|				blan|				ent|				OTRO|
-/*E0*/ {	Iniciar_concat,	    Iniciar_Com,	    Inf_OpProducto,	    Inf_OpDivision,	    Iniciar_ID,	        Iniciar_Cte,	    Iniciar_Igual,	    Iniciar_MenorIgual,	    Iniciar_MayorIgual,	    Inciar_CteStr,	    Iniciar_Cte_Float,	    Inf_OpCorchAbre,	Inf_OpCorchCierra,	    Inf_OpLLAbre,	    Inf_OpLLCierra,	    Inf_OpParAbre,	    Inf_OpParCierra,	Inf_SepLista,	    Iniciar_ID,	        Inf_Sep,	        Iniciar_Asignacion,	    Nada,	            Nada,	            Nada,	            Caract_No_Val },
+/*E0*/ {	Iniciar_concat,	    Iniciar_Com,	    Inf_OpProducto,	    Inf_OpDivision,	    Iniciar_ID,	        Iniciar_Cte,	    Iniciar_Igual,	    Iniciar_MenorIgual,	    Iniciar_MayorIgual,	    Inciar_CteStr,	    Iniciar_Cte_Float,	    Inf_OpCorchAbre,	Inf_OpCorchCierra,	    Inf_OpLLAbre,	    Inf_OpLLCierra,	    Inf_OpParAbre,	    Inf_OpParCierra,	Inf_SepLista,	    Iniciar_ID,	        Inf_Sep,	        Iniciar_Asignacion,	    Nada,	            Nada,	            Inc_NroLinea,	    Caract_No_Val },
 /*E1*/ {	Inf_ID,	            Inf_ID,	            Inf_ID,	            Inf_ID,	            Agregar_ID,	        Agregar_ID,	        Inf_ID,	            Inf_ID,	                Inf_ID,	                Inf_ID,	            Agregar_ID,	            Inf_ID,	            Inf_ID,	                Inf_ID,	            Inf_ID,	            Inf_ID,	            Inf_ID,	            Inf_ID,	            Agregar_ID,	        Inf_ID,	            Inf_ID,	                Inf_ID,	            Inf_ID,	            Inf_ID,	            Inf_ID },
 /*E2*/ {	Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Agregar_Cte,	    Inf_Cte,	        Inf_Cte,	            Inf_Cte,	            Inf_Cte,	        Iniciar_Cte_Float,	    Inf_Cte,	        Inf_Cte,	            Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	            Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte },
 /*E3*/ {	Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Agregar_Cte,	    Inf_Cte,	        Inf_Cte,	            Inf_Cte,	            Inf_Cte,	        Caract_No_Val,	        Inf_Cte,	        Inf_Cte,	            Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte,	            Inf_Cte,	        Inf_Cte,	        Inf_Cte,	        Inf_Cte },
@@ -1438,7 +1446,7 @@ int main(int argc, char* argv[])
 }
 
 void warning(char *s, char *t){
-	fprintf(stderr, "%s", s);
+	fprintf(stderr, "\n%s", s);
 	if (t)
 		fprintf(stderr, " %s", t);
 	fprintf(stderr, " en la linea %d.\nLexema: %s\nCaracter: %c\n", nroLinea, token, caracter);
