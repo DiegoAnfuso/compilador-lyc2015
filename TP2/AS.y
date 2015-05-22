@@ -92,7 +92,7 @@ condicion : cond_simple | cond_multiple
 cond_simple : comparacion { printf("\nCondicion simple\n"); }
 ;
 
-cond_multiple : OP_PABRE cond_simple op_logico cond_simple OP_PCIERRA { printf("\nCondicion multiple\n"); }|
+cond_multiple : OP_PABRE comparacion OP_PCIERRA op_logico OP_PABRE comparacion OP_PCIERRA { printf("\nCondicion multiple\n"); }|
 				PR_NOT OP_PABRE comparacion OP_PCIERRA { printf("\nCondicion multiple\n"); }
 ;
 

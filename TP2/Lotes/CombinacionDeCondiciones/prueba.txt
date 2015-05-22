@@ -35,16 +35,23 @@ ENDDECLARE
 		PUT "falso";
 	ENDIF
 
-	IF( NOT(var1==var2) OR var3==var4)
-	THEN
-		PUT "verdadero";
-	ELSE
-		PUT "falso";
-	ENDIF
-
 	IF(var1==var2 OR var3==var4)
 	THEN
 		PUT "verdadero";
 	ELSE
 		PUT "falso";
 	ENDIF
+
+	IF(var1==var2 OR var3>=var4)
+	THEN
+		PUT "verdadero";
+	ELSE
+		PUT "falso";
+	ENDIF
+
+	IF(NOT(var3==var4))
+	THEN
+		PUT "verdadero";
+	ELSE
+		PUT "falso";
+	ENDIF	

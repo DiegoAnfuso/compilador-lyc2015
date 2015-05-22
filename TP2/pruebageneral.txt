@@ -42,8 +42,7 @@ IF(a1>=a2) THEN PUT "2"; ENDIF
 IF(a1<a2) THEN PUT "3"; ENDIF
 IF(a1<=a2) THEN PUT "4"; ENDIF
 IF(a1==a2) THEN PUT "5"; ENDIF
-IF( a1>=a2 AND a1>=a3 ) THEN PUT "a1 es mayor"; ENDIF
-IF( a1>=a2 OR a1>=a3 ) THEN PUT "a1 es mayor a alguno"; ELSE PUT "no es mayor a ninguno"; ENDIF
+IF( NOT(a1==a2) ) THEN PUT "8"; ENDIF
 
 --/
 IF( (a1==a2) AND (a2==a3) ) THEN PUT "6"; ENDIF
