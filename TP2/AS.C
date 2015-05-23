@@ -191,8 +191,8 @@ void cerrarCodigoFuente()
     if(fclose(input)!=0)
     {
         printf("No se puede CERRAR el archivo de entrada");
-        getch();
-        exit(1);
+        //getch();
+        //exit(1);
     }
 }
 
@@ -1311,12 +1311,12 @@ int yylex() //FUNCION  QUE LEE HASTA FINAL DE TOKEN O EOF
 
                 if (estado == 0)
                     return EOF;
-				printf("\nToken %d - %s", NroToken, token);
+				//printf("\nToken %d - %s", NroToken, token);
                 return NroToken;
 		    }
 		}
     }
-	printf("\nToken %d - %s", NroToken, token);
+	//printf("\nToken %d - %s", NroToken, token);
     return NroToken;
 }
 
@@ -1353,8 +1353,8 @@ int main(int argc, char* argv[])
     cerrarCodigoFuente();
 
     if (error==0)
-        mostrarTOS();
-    else
+		printf("\nCOMPILACION EXITOSA!\n");
+	else
         return 1;
 
     return 0;
@@ -1702,9 +1702,6 @@ int yyparse()
     if (j>=YYLAST || yychk[ tmpstate = yyact[j] ] != -n) tmpstate = yyact[yypgo[n]];
     switch (m) { /* actions associated with grammar rules */
 
-      case 1:
-# line 43 "AS.y"
-      { printf("\nCOMPILACION EXITOSA!\n"); } break;
       case 6:
 # line 54 "AS.y"
       { printf("\nDeclaracion de variable\n"); } break;
@@ -1728,7 +1725,7 @@ int yyparse()
       { printf("\nCondicion multiple\n"); } break;
       case 31:
 # line 95 "AS.y"
-      { printf("\nCondicion multiple\n"); } break;
+      { printf("\nCondicion NOT\n"); } break;
       case 32:
 # line 98 "AS.y"
       { printf("\nComparacion\n"); } break;
@@ -1737,7 +1734,7 @@ int yyparse()
       { printf("\nIteracion WHILE\n"); } break;
       case 41:
 # line 110 "AS.y"
-      {printf("\nLectura de entrada\n");} break;
+      {printf("\nLectura de entrada por teclado\n");} break;
       case 42:
 # line 113 "AS.y"
       {printf("\nEscritura de identificador\n"); } break;

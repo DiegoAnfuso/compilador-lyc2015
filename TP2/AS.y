@@ -40,7 +40,7 @@ Villaverde, Leonel
 %left  OP_PCIERRA OP_CCIERRA OP_LLCIERRA
 
 %%
-programa_principal : programa { printf("\nCOMPILACION EXITOSA!\n"); }
+programa_principal : programa 
 ;
 
 programa : PR_DECLARE OP_PABRE declaraciones OP_PCIERRA PR_ENDDECLARE sentencias |
@@ -92,7 +92,7 @@ cond_simple : comparacion { printf("\nCondicion simple\n"); }
 ;
 
 cond_multiple : cond_simple op_logico cond_simple { printf("\nCondicion multiple\n"); }|
-				PR_NOT OP_PABRE comparacion OP_PCIERRA { printf("\nCondicion multiple\n"); }
+				PR_NOT OP_PABRE comparacion OP_PCIERRA { printf("\nCondicion NOT\n"); }
 ;
 
 comparacion : expresion comparador expresion { printf("\nComparacion\n"); }
@@ -107,7 +107,7 @@ op_logico : PR_AND | PR_OR
 iteracion: PR_WHILE OP_PABRE condicion OP_PCIERRA sentencias PR_END { printf("\nIteracion WHILE\n"); }
 ;
 
-entrada: PR_GET ID  {printf("\nLectura de entrada\n");}
+entrada: PR_GET ID  {printf("\nLectura de entrada por teclado\n");}
 ;
 
 salida: PR_PUT ID {printf("\nEscritura de identificador\n"); }| PR_PUT CTE_STRING {printf("\nEscritura de constante string\n"); }
@@ -275,8 +275,8 @@ void cerrarCodigoFuente()
     if(fclose(input)!=0)
     {
         printf("No se puede CERRAR el archivo de entrada");
-        getch();
-        exit(1);
+        //getch();
+        //exit(1);
     }
 }
 
@@ -1395,12 +1395,12 @@ int yylex() //FUNCION  QUE LEE HASTA FINAL DE TOKEN O EOF
 
                 if (estado == 0)
                     return EOF;
-				printf("\nToken %d - %s", NroToken, token);
+				//printf("\nToken %d - %s", NroToken, token);
                 return NroToken;
 		    }
 		}
     }
-	printf("\nToken %d - %s", NroToken, token);
+	//printf("\nToken %d - %s", NroToken, token);
     return NroToken;
 }
 
@@ -1437,8 +1437,8 @@ int main(int argc, char* argv[])
     cerrarCodigoFuente();
 
     if (error==0)
-        mostrarTOS();
-    else
+		printf("\nCOMPILACION EXITOSA!\n");
+	else
         return 1;
 
     return 0;
