@@ -43,8 +43,7 @@ Villaverde, Leonel
 programa_principal : programa { printf("\nCOMPILACION EXITOSA!\n"); }
 ;
 
-programa : declaraciones |
-		   PR_DECLARE OP_PABRE declaraciones OP_PCIERRA PR_ENDDECLARE sentencias |
+programa : PR_DECLARE OP_PABRE declaraciones OP_PCIERRA PR_ENDDECLARE sentencias |
 		   sentencias
 ;
 		   
