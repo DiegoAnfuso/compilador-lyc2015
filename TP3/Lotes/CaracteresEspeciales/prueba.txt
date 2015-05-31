@@ -1,0 +1,6 @@
+DECLARE
+		(var:STRING)
+ENDDECLARE
+	PUT "carac especiales.: #%&";
+	var:="Mas ()*|~!@?{}[]-_";
+	GET var;

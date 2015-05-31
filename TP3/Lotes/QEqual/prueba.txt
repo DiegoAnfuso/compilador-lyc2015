@@ -1,0 +1,29 @@
+DECLARE
+  (a:REAL,b:REAL,c:REAL,d:REAL,e:REAL)
+ENDDECLARE
+
+a:=1;
+b:=2;
+c:=2;
+d:=2;
+e:=2;
+
+e:=QEqual(a+b,[(d-3)*2,3,3]);
+
+d:=QEqual(2,[2,2,2,2,1]);
+
+IF( d == 4)
+  THEN
+    PUT "OK";
+  ELSE
+    PUT "ERROR";
+ENDIF
+
+d:=QEqual(1,[2,2,2,2,1]);
+
+IF( d == 1)
+  THEN
+    PUT "OK";
+  ELSE
+    PUT "ERROR";
+ENDIF

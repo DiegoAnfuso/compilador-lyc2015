@@ -1,0 +1,50 @@
+DECLARE
+	(a1:REAL, a2:REAL, a3:REAL, a4:INT, a5:INT, s1:STRING)
+ENDDECLARE
+
+WHILE( a1>a2 )
+	a1:=13.13;
+END
+
+IF (a1==a2)
+THEN
+	a2:=a1+1;
+ELSE
+	a1:= a3;
+ENDIF
+
+a1 := 99.99;
+a2 := .88;
+a3 := 77.;
+a2:=a1;
+
+a1 := "abc";
+a2 := s1;
+a3 := s2++s1;
+
+CONST c1 := 99;
+CONST c2 :="ejemplo constante";
+
+--/ comentario; /  ---/a/a-a///--- /--
+
+PUT "Condicion simple";
+GET s1;
+
+LET a1:3+2,a2:2*2,a3,a4:4/2,a5:6-2 DEFAULT a1+a2;
+
+a1:=QEqual (a1+a2, [(a3-3)*2,3,3]);
+
+IF(a1>a2)
+THEN 
+	PUT "1";
+ENDIF
+IF(a1>=a2) THEN PUT "2"; ENDIF
+IF(a1<a2) THEN PUT "3"; ENDIF
+IF(a1<=a2) THEN PUT "4"; ENDIF
+IF(a1==a2) THEN PUT "5"; ENDIF
+IF( NOT(a1==a2) ) THEN PUT "8"; ENDIF
+
+--/
+IF( (a1==a2) AND (a2==a3) ) THEN PUT "6"; ENDIF
+IF( (a1==a2) OR (a2==a3) ) THEN PUT "7"; ENDIF
+/--
