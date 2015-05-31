@@ -1,247 +1,68 @@
-/* --------------------------------------------------------------------------
-Lenguajes y Compiladores
 
-GRUPO 26:
-Anfuso, Diego
-Villaverde, Leonel
- --------------------------------------------------------------------------*/
-%{
+# line 9 "AS.y"
 #include <conio.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 //#define MI_DEBUG 1
-%}
+#define PR_DECLARE 257
+#define PR_ENDDECLARE 258
+#define PR_INT 259
+#define PR_REAL 260
+#define PR_STRING 261
+#define PR_CONST 262
+#define PR_IF 263
+#define PR_ELSE 264
+#define PR_ENDIF 265
+#define PR_BEGIN 266
+#define PR_END 267
+#define PR_GET 268
+#define PR_PUT 269
+#define PR_WHILE 270
+#define PR_LET 271
+#define PR_QEQUAL 272
+#define PR_DEFAULT 273
+#define PR_THEN 274
+#define OP_ASIG 275
+#define OP_SUMA 276
+#define OP_RESTA 277
+#define OP_MULTIPLI 278
+#define OP_DIVISION 279
+#define OP_CONCAT 280
+#define PR_OR 281
+#define PR_AND 282
+#define OP_IGUAL 283
+#define OP_MENOR 284
+#define OP_MENORIGUAL 285
+#define OP_MAYOR 286
+#define OP_MAYORIGUAL 287
+#define PR_NOT 288
+#define ID 289
+#define CTE_ENT 290
+#define CTE_REAL 291
+#define CTE_STRING 292
+#define OP_PABRE 293
+#define OP_PCIERRA 294
+#define OP_CABRE 295
+#define OP_CCIERRA 296
+#define OP_LLABRE 297
+#define OP_LLCIERRA 298
+#define OP_TIPO 299
+#define OP_GUION 300
+#define SEP_DOSP 301
+#define SEP_DECIMAL 302
+#define SEP_SENT 303
+#define SEP_LISTA 304
+#define OP_DISTINTO 305
+#ifndef YYSTYPE
+#define YYSTYPE int
+#endif
+YYSTYPE yylval, yyval;
+#define YYERRCODE 256
 
-/* -------------------------------------------------------------------------- */
-/* ------------------------------- YACC TOKENS ------------------------------ */
-/* -------------------------------------------------------------------------- */
-%token PR_DECLARE PR_ENDDECLARE
-%token PR_INT PR_REAL PR_STRING PR_CONST 
-%token PR_IF PR_ELSE PR_ENDIF PR_BEGIN PR_END PR_GET PR_PUT PR_WHILE PR_LET PR_QEQUAL PR_DEFAULT PR_THEN
-%token OP_ASIG OP_SUMA OP_RESTA OP_MULTIPLI OP_DIVISION OP_CONCAT
-%token PR_OR PR_AND OP_IGUAL OP_MENOR OP_MENORIGUAL OP_MAYOR OP_MAYORIGUAL PR_NOT
-%token ID 
-%token CTE_ENT
-%token CTE_REAL
-%token CTE_STRING
-%token OP_PABRE OP_PCIERRA OP_CABRE OP_CCIERRA OP_LLABRE OP_LLCIERRA OP_TIPO OP_GUION SEP_DOSP
-%token SEP_DECIMAL SEP_SENT SEP_LISTA
+# line 244 "AS.y"
 
-/* ------------------------------- PRECEDENCIAS ----------------------------- */
-%right OP_ASIG
-%left  OP_SUMA OP_RESTA
-%left  OP_MULTIPLI OP_DIVISION
-%left  OP_CONCAT
-%left  PR_OR PR_AND
-%left  OP_IGUAL OP_MENOR OP_MENORIGUAL OP_MAYOR OP_MAYORIGUAL OP_DISTINTO
-%right PR_NOT
-%right OP_PABRE OP_CABRE OP_LLABRE
-%left  OP_PCIERRA OP_CCIERRA OP_LLCIERRA
-
-%%
-programa_principal : programa 
-;
-
-programa : PR_DECLARE OP_PABRE declaraciones OP_PCIERRA PR_ENDDECLARE sentencias |
-		   sentencias
-;
-		   
-declaraciones : declaracion |
-				declaraciones SEP_LISTA declaracion
-;
-
-declaracion : ID SEP_DOSP tipo_variable { printf("\nDeclaracion de variable\n"); }
-;
-
-tipo_variable : PR_INT    { tipo_dato = PR_INT; }
-                    | PR_REAL   { tipo_dato = PR_REAL; }
-                    | PR_STRING { tipo_dato = PR_STRING; }
-                    ;
-
-sentencias : sentencia |
-			sentencias sentencia
-;
-
-sentencia : asignacion SEP_SENT { 
-									#ifdef MI_DEBUG 
-										printf("%s\n",buscarEnTOS($1)); 
-									#endif
-									insertarNodoEnPolaca(0, TOS[$1]);
-
-									#ifdef MI_DEBUG 
-										printf(":=\n");
-									#endif  
-									insertarValorEnPolaca(1, ":=");
-								}
-			| iteracion |
-			decision |
-			entrada SEP_SENT |
-			salida SEP_SENT |
-			/*def_constante SEP_SENT |*/
-			PR_CONST ID OP_ASIG expresion SEP_SENT |
-			let SEP_SENT
-;
-
-asignacion : ID OP_ASIG expresion { printf("\nAsignacion\n"); }|
-			 ID OP_ASIG concatenacion |
-			 ID OP_ASIG qequal
-;
-
-concatenacion : cadena OP_CONCAT cadena { 
-										#ifdef MI_DEBUG 
-											printf("++\n");
-										#endif
-										insertarNodoEnPolaca(0, TOS[$1]);
-										insertarNodoEnPolaca(0, TOS[$3]);
-										insertarValorEnPolaca(1, "++");
-									  }
-;
-cadena : ID | CTE_STRING
-;
-
-decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias PR_ENDIF { printf("\nSentencia IF\n"); }|
-		   PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias PR_ELSE sentencias PR_ENDIF { printf("\nSentencia IF con ELSE\n"); }
-;		   
-
-condicion : cond_simple | cond_multiple
-;
-
-cond_simple : comparacion { printf("\nCondicion simple\n"); }
-;
-
-cond_multiple : cond_simple op_logico cond_simple { printf("\nCondicion multiple\n"); }|
-				PR_NOT OP_PABRE comparacion OP_PCIERRA { printf("\nCondicion NOT\n"); }
-;
-
-comparacion : expresion comparador expresion { printf("\nComparacion\n"); }
-;
-
-comparador      : OP_MENOR      { strcpy(operadorCond, "BGE"); }
-                    | OP_MENORIGUAL { strcpy(operadorCond, "BGT"); }
-                    | OP_MAYOR      { strcpy(operadorCond, "BLE"); }
-                    | OP_MAYORIGUAL { strcpy(operadorCond, "BLT"); }
-                    | OP_IGUAL      { strcpy(operadorCond, "BNE"); }
-                    | OP_DISTINTO   { strcpy(operadorCond, "BEQ"); }
-                    ;
-
-op_logico           : PR_AND { strcpy(operadorLogico, "AND"); }
-                    | PR_OR  { strcpy(operadorLogico, "OR"); }
-                    ;
-
-
-iteracion: PR_WHILE OP_PABRE condicion OP_PCIERRA sentencias PR_END { printf("\nIteracion WHILE\n"); }
-;
-
-entrada: PR_GET ID  {
-						#ifdef MI_DEBUG 
-							printf("GET\n");
-						#endif
-						insertarValorEnPolaca(1, "GET");
-					}
-;
-
-salida: PR_PUT ID 	{
-						#ifdef MI_DEBUG 
-							printf("PUT\n");
-						#endif    
-						insertarValorEnPolaca(1, "PUT");
-					}
-		| PR_PUT CTE_STRING {
-								#ifdef MI_DEBUG 
-									printf("PUT\n");
-								#endif    
-								insertarValorEnPolaca(1, "PUT");
-							}
-;
-
-cte : CTE_STRING {  tipo_const = PR_STRING; 
-					if(!esCONST)
-					{
-						#ifdef MI_DEBUG 
-							printf("%s\n",buscarEnTOS($1)); 
-						#endif
-						insertarNodoEnPolaca(0, TOS[$1]);
-					}
-				 } 
-				 | CTE_ENT  	{   tipo_const = PR_INT;  
-						if(!esCONST)
-						{
-							#ifdef MI_DEBUG 
-								printf("%s\n",buscarEnTOS($1)); 
-							#endif
-							insertarNodoEnPolaca(0, TOS[$1]);
-						}
-					}
-				| CTE_REAL 	{   tipo_const = PR_REAL; 
-								if(!esCONST)
-								{
-									#ifdef MI_DEBUG 
-										printf("%s\n",buscarEnTOS($1)); 
-									#endif
-									insertarNodoEnPolaca(0, TOS[$1]);
-								}
-				   }
-;
-
-expresion : expresion OP_SUMA termino 	{ 
-											#ifdef MI_DEBUG 
-												printf("+\n");
-											#endif
-											insertarValorEnPolaca(1, "+");  
-										} 
-			| expresion OP_RESTA termino 	{ 
-												#ifdef MI_DEBUG 
-													printf("-\n"); 
-												#endif
-												insertarValorEnPolaca(1, "-"); 
-											}
-			| termino
-;
-
-termino : termino OP_MULTIPLI factor 	{ 
-											#ifdef MI_DEBUG 
-												printf("*\n");
-											#endif
-											insertarValorEnPolaca(1, "*");
-										}
-		| termino OP_DIVISION factor 	{ 
-											#ifdef MI_DEBUG 
-												printf("/\n");
-											#endif
-											insertarValorEnPolaca(1, "/");
-										}
-		| factor
-;
-
-factor : OP_PABRE expresion OP_PCIERRA 	{ 
-											$$ = $2; 
-										}
-		|ID {  
-				#ifdef MI_DEBUG 
-					printf("%s\n",buscarEnTOS($1));
-				#endif
-				insertarNodoEnPolaca(0, TOS[$1]);
-			}
-		|cte
-;
-
-qequal : PR_QEQUAL OP_PABRE expresion SEP_LISTA OP_CABRE lista_expresiones OP_CCIERRA OP_PCIERRA { printf("\nQequal\n"); }
-;
-lista_expresiones : expresion | lista_expresiones SEP_LISTA expresion
-;
-
-let : PR_LET lista_let PR_DEFAULT expresion { printf("\nLET\n"); }
-;
-
-asig_let : ID SEP_DOSP expresion | ID
-;
-lista_let : asig_let | lista_let SEP_LISTA asig_let
-;
-
-
-%% 
 
 /* -------------------------------------------------------------------------- */
 /*                             VARIABLES GLOBALES                             */
@@ -839,7 +660,7 @@ int tipo_dato;
 int tipo_const;
 int esCONST = 0;
 
-typedef struct 
+typedef struct
 {
     char nombre[TAMTOKEN];
     int  token;
@@ -1228,7 +1049,7 @@ int insertarTOS(int NroToken, const char * lexema)
 			if (strcmp(TOS[i].valor,auxStr)==0)
 				return i;
 		}
-    } else {	
+    } else {
 		for (i=CANTPR; i<TOStop;  i++)
 		{
 			if (strcmp(TOS[i].nombre,lexema)==0)
@@ -1242,7 +1063,7 @@ int insertarTOS(int NroToken, const char * lexema)
             /*if (!enDECLARE) {
                 yyerror("Variable no declarada.");
             }
-            
+
             if (!esCONST)*/
                 strcpy(TOS[TOStop].tipo,"ID" );
             /*else
@@ -1251,7 +1072,7 @@ int insertarTOS(int NroToken, const char * lexema)
             TOS[TOStop].tipo_dato = tipo_dato;
 			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
-            break;        
+            break;
         case CTE_ENT:
 			strcpy(aux,"_");
             strcat(aux, lexema);
@@ -1279,7 +1100,7 @@ int insertarTOS(int NroToken, const char * lexema)
             break;
     }
 
-    
+
     TOStop++;
 
     return TOStop-1;
@@ -1523,7 +1344,7 @@ FILE * archPolaca;
 char operadorCond[5];
 char operadorLogico[5];
 
-typedef struct 
+typedef struct
 {
     int    tipo;
     nodoTS nodo;
@@ -1562,21 +1383,21 @@ void imprimirPolacaInversa()
         printf("No se puede CERRAR el archivo de polaca");
         getch();
         exit(1);
-    }    
+    }
 }
 
 void insertarNodoEnPolaca(int tipo, const nodoTS nodo)
 {
-    polacaInversa[nroNodoPolaca].tipo = tipo; 
+    polacaInversa[nroNodoPolaca].tipo = tipo;
     polacaInversa[nroNodoPolaca].nodo = nodo;
     nroNodoPolaca++;
 }
 
 void insertarValorEnPolaca(int tipo, const char * valor)
 {
-    polacaInversa[nroNodoPolaca].tipo = tipo; 
+    polacaInversa[nroNodoPolaca].tipo = tipo;
     strcpy(polacaInversa[nroNodoPolaca].nodo.valor, valor);
-    nroNodoPolaca++; 
+    nroNodoPolaca++;
 }
 
 void asignarSaldosCondicionales(int posicion)
@@ -1637,5 +1458,532 @@ void warning(char *s, char *t){
 
 int yyerror(char *s){
 	warning(s, (char *) 0);
-	exit(1);    
+	exit(1);
+}
+FILE *yytfilep;
+char *yytfilen;
+int yytflag = 0;
+int svdprd[2];
+char svdnams[2][2];
+
+int yyexca[] = {
+  -1, 1,
+  0, -1,
+  -2, 0,
+  -1, 46,
+  280, 23,
+  -2, 55,
+  -1, 47,
+  280, 24,
+  -2, 45,
+  0,
+};
+
+#define YYNPROD 65
+#define YYLAST 260
+
+int yyact[] = {
+      68,      69,      68,      69,     123,      68,      69,      85,
+      81,      82,      83,      84,     124,      64,      61,      25,
+      23,      22,      21,      66,     117,      63,      44,      65,
+      58,      50,      51,      59,      48,      86,     113,     126,
+      97,      56,      58,      50,      51,      59,      48,      46,
+      50,      51,      47,      48,      79,      62,      11,      15,
+     119,     118,      68,      69,      16,      17,      14,      18,
+      11,      15,     115,     125,      87,      75,      16,      17,
+      14,      18,      73,      72,     106,      11,      15,      28,
+      27,      13,     114,      16,      17,      14,      18,       3,
+      11,      15,      19,      13,      11,      15,      16,      17,
+      14,      18,      16,      17,      14,      18,     103,      30,
+      13,     104,      31,      37,      34,      29,      24,      38,
+      78,      77,      26,      13,      70,      71,      91,      13,
+      68,      69,     111,      94,      95,      96,      57,      45,
+      33,      55,       5,      53,      43,      32,      42,      20,
+     120,      49,      80,      76,      54,      52,      41,      40,
+       4,      12,      10,       9,      36,       8,       7,       5,
+       6,      39,      93,      35,       2,       1,       0,       0,
+       0,       0,       0,       0,       0,      67,      38,       0,
+       0,       0,      60,       0,       0,       0,       0,      74,
+       0,       0,       0,       0,       0,       0,       0,       0,
+       0,       0,       0,       0,      88,       0,      90,      89,
+       0,       0,      48,       0,       0,       0,     100,     101,
+     105,      61,      52,      98,      99,     102,       0,     110,
+     108,     109,       0,       0,       0,       0,      92,      63,
+       0,      73,      33,       0,     107,       0,       0,       0,
+       0,       0,       0,       0,      71,      45,       0,       0,
+      80,      69,      42,      43,     112,     117,      20,      55,
+      53,      36,       0,      20,     121,       0,       0,      20,
+     124,       0,       0,     127,      91,      20,      57,       0,
+     116,     111,       0,       0,       0,     119,       0,       0,
+     122,       0,       0,       4,
+};
+
+int yypact[] = {
+    -178,   -1000,   -1000,    -211,    -182,   -1000,    -285,   -1000,
+   -1000,    -286,    -287,    -187,    -288,    -169,    -221,    -222,
+    -188,    -194,    -189,    -190,   -1000,   -1000,   -1000,   -1000,
+    -172,   -1000,    -250,    -255,    -255,   -1000,   -1000,   -1000,
+    -259,   -1000,    -280,    -281,   -1000,    -282,    -265,    -164,
+   -1000,   -1000,    -170,    -213,    -227,   -1000,   -1000,   -1000,
+    -265,   -1000,   -1000,   -1000,    -233,    -177,   -1000,   -1000,
+    -249,    -276,   -1000,   -1000,    -234,    -265,    -189,    -265,
+    -148,    -190,    -144,    -271,    -265,    -265,    -265,    -265,
+    -195,    -265,    -226,    -182,    -265,   -1000,   -1000,    -265,
+    -265,   -1000,   -1000,   -1000,   -1000,   -1000,   -1000,    -160,
+    -164,   -1000,    -164,    -182,   -1000,   -1000,   -1000,   -1000,
+   -1000,   -1000,    -170,    -170,   -1000,   -1000,   -1000,   -1000,
+   -1000,    -274,   -1000,    -193,   -1000,    -236,    -164,    -182,
+    -182,    -275,   -1000,   -1000,    -216,    -265,   -1000,    -182,
+    -292,    -164,    -206,    -263,    -265,   -1000,   -1000,    -164,
+};
+
+int yypgo[] = {
+       0,     149,     148,     147,     136,     140,     146,     122,
+     144,     142,     141,     139,     138,     118,     137,     135,
+     134,     124,     133,     123,     132,     121,     131,     130,
+     129,     126,     119,     128,     125,     120,
+};
+
+int yyr1[] = {
+       0,       1,       2,       2,       3,       3,       5,       6,
+       6,       6,       4,       4,       7,       7,       7,       7,
+       7,       7,       7,       8,       8,       8,      15,      17,
+      17,      10,      10,      18,      18,      19,      20,      20,
+      21,      23,      23,      23,      23,      23,      23,      22,
+      22,       9,      11,      12,      12,      24,      24,      24,
+      13,      13,      13,      25,      25,      25,      26,      26,
+      26,      16,      27,      27,      14,      29,      29,      28,
+      28,
+};
+
+int yyr2[] = {
+       2,       1,       6,       1,       1,       3,       3,       1,
+       1,       1,       1,       2,       2,       1,       1,       2,
+       2,       5,       2,       3,       3,       3,       3,       1,
+       1,       7,       9,       1,       1,       1,       3,       4,
+       3,       1,       1,       1,       1,       1,       1,       1,
+       1,       6,       2,       2,       2,       1,       1,       1,
+       3,       3,       1,       3,       3,       1,       3,       1,
+       1,       8,       1,       3,       4,       3,       1,       1,
+       3,
+};
+
+int yychk[] = {
+   -1000,      -1,      -2,     257,      -4,      -7,      -8,      -9,
+     -10,     -11,     -12,     262,     -14,     289,     270,     263,
+     268,     269,     271,     293,      -7,     303,     303,     303,
+     289,     303,     275,     293,     293,     289,     289,     292,
+     -28,     -29,     289,      -3,      -5,     289,     275,     -13,
+     -15,     -16,     -25,     -17,     272,     -26,     289,     292,
+     293,     -24,     290,     291,     -18,     -19,     -20,     -21,
+     288,     -13,     289,     292,     -18,     273,     304,     301,
+     294,     304,     301,     -13,     276,     277,     278,     279,
+     280,     293,     -13,     294,     -22,     282,     281,     293,
+     -23,     284,     285,     286,     287,     283,     305,     294,
+     -13,     -29,     -13,     258,      -5,      -6,     259,     260,
+     261,     303,     -25,     -25,     -26,     -26,     -17,     289,
+     292,     -13,     294,      -4,     -19,     -21,     -13,     274,
+      -4,     304,     267,     294,      -4,     295,     265,     264,
+     -27,     -13,      -4,     296,     304,     265,     294,     -13,
+};
+
+int yydef[] = {
+       0,      -2,       1,       0,       3,      10,       0,      13,
+      14,       0,       0,       0,       0,       0,       0,       0,
+       0,       0,       0,       0,      11,      12,      15,      16,
+       0,      18,       0,       0,       0,      42,      43,      44,
+       0,      63,      62,       0,       4,       0,       0,      19,
+      20,      21,      50,       0,       0,      53,      -2,      -2,
+       0,      56,      46,      47,       0,      27,      28,      29,
+       0,       0,      55,      45,       0,       0,       0,       0,
+       0,       0,       0,       0,       0,       0,       0,       0,
+       0,       0,       0,       0,       0,      39,      40,       0,
+       0,      33,      34,      35,      36,      37,      38,       0,
+      60,      64,      61,       0,       5,       6,       7,       8,
+       9,      17,      48,      49,      51,      52,      22,      23,
+      24,       0,      54,       0,      30,       0,      32,       0,
+       2,       0,      41,      31,       0,       0,      25,       0,
+       0,      58,       0,       0,       0,      26,      57,      59,
+};
+
+int *yyxi;
+
+
+/*****************************************************************/
+/* PCYACC LALR parser driver routine -- a table driven procedure */
+/* for recognizing sentences of a language defined by the        */
+/* grammar that PCYACC analyzes. An LALR parsing table is then   */
+/* constructed for the grammar and the skeletal parser uses the  */
+/* table when performing syntactical analysis on input source    */
+/* programs. The actions associated with grammar rules are       */
+/* inserted into a switch statement for execution.               */
+/*****************************************************************/
+
+
+#ifndef YYMAXDEPTH
+#define YYMAXDEPTH 200
+#endif
+#ifndef YYREDMAX
+#define YYREDMAX 1000
+#endif
+#define PCYYFLAG -1000
+#define WAS0ERR 0
+#define WAS1ERR 1
+#define WAS2ERR 2
+#define WAS3ERR 3
+#define yyclearin pcyytoken = -1
+#define yyerrok   pcyyerrfl = 0
+YYSTYPE yyv[YYMAXDEPTH];     /* value stack */
+int pcyyerrct = 0;           /* error count */
+int pcyyerrfl = 0;           /* error flag */
+int redseq[YYREDMAX];
+int redcnt = 0;
+int pcyytoken = -1;          /* input token */
+
+
+int yyparse()
+{
+  int statestack[YYMAXDEPTH]; /* state stack */
+  int      j, m;              /* working index */
+  YYSTYPE *yypvt;
+  int      tmpstate, tmptoken, *yyps, n;
+  YYSTYPE *yypv;
+
+
+  tmpstate = 0;
+  pcyytoken = -1;
+#ifdef YYDEBUG
+  tmptoken = -1;
+#endif
+  pcyyerrct = 0;
+  pcyyerrfl = 0;
+  yyps = &statestack[-1];
+  yypv = &yyv[-1];
+
+
+  enstack:    /* push stack */
+#ifdef YYDEBUG
+    printf("at state %d, next token %d\n", tmpstate, tmptoken);
+#endif
+    if (++yyps - &statestack[YYMAXDEPTH] > 0) {
+      yyerror("pcyacc internal stack overflow");
+      return(1);
+    }
+    *yyps = tmpstate;
+    ++yypv;
+    *yypv = yyval;
+
+
+  newstate:
+    n = yypact[tmpstate];
+    if (n <= PCYYFLAG) goto defaultact; /*  a simple state */
+
+
+    if (pcyytoken < 0) if ((pcyytoken=yylex()) < 0) pcyytoken = 0;
+    if ((n += pcyytoken) < 0 || n >= YYLAST) goto defaultact;
+
+
+    if (yychk[n=yyact[n]] == pcyytoken) { /* a shift */
+#ifdef YYDEBUG
+      tmptoken  = pcyytoken;
+#endif
+      pcyytoken = -1;
+      yyval = yylval;
+      tmpstate = n;
+      if (pcyyerrfl > 0) --pcyyerrfl;
+      goto enstack;
+    }
+
+
+  defaultact:
+
+
+    if ((n=yydef[tmpstate]) == -2) {
+      if (pcyytoken < 0) if ((pcyytoken=yylex())<0) pcyytoken = 0;
+      for (yyxi=yyexca; (*yyxi!= (-1)) || (yyxi[1]!=tmpstate); yyxi += 2);
+      while (*(yyxi+=2) >= 0) if (*yyxi == pcyytoken) break;
+      if ((n=yyxi[1]) < 0) { /* an accept action */
+        if (yytflag) {
+          int ti; int tj;
+          yytfilep = fopen(yytfilen, "w");
+          if (yytfilep == NULL) {
+            fprintf(stderr, "Can't open t file: %s\n", yytfilen);
+            return(0);          }
+          for (ti=redcnt-1; ti>=0; ti--) {
+            tj = svdprd[redseq[ti]];
+            while (strcmp(svdnams[tj], "$EOP"))
+              fprintf(yytfilep, "%s ", svdnams[tj++]);
+            fprintf(yytfilep, "\n");
+          }
+          fclose(yytfilep);
+        }
+        return (0);
+      }
+    }
+
+
+    if (n == 0) {        /* error situation */
+      switch (pcyyerrfl) {
+        case WAS0ERR:          /* an error just occurred */
+          yyerror("syntax error");
+          yyerrlab:
+            ++pcyyerrct;
+        case WAS1ERR:
+        case WAS2ERR:           /* try again */
+          pcyyerrfl = 3;
+	   /* find a state for a legal shift action */
+          while (yyps >= statestack) {
+	     n = yypact[*yyps] + YYERRCODE;
+	     if (n >= 0 && n < YYLAST && yychk[yyact[n]] == YYERRCODE) {
+	       tmpstate = yyact[n];  /* simulate a shift of "error" */
+	       goto enstack;
+            }
+	     n = yypact[*yyps];
+
+
+	     /* the current yyps has no shift on "error", pop stack */
+#ifdef YYDEBUG
+            printf("error: pop state %d, recover state %d\n", *yyps, yyps[-1]);
+#endif
+	     --yyps;
+	     --yypv;
+	   }
+
+
+	   yyabort:
+            if (yytflag) {
+              int ti; int tj;
+              yytfilep = fopen(yytfilen, "w");
+              if (yytfilep == NULL) {
+                fprintf(stderr, "Can't open t file: %s\n", yytfilen);
+                return(1);              }
+              for (ti=1; ti<redcnt; ti++) {
+                tj = svdprd[redseq[ti]];
+                while (strcmp(svdnams[tj], "$EOP"))
+                  fprintf(yytfilep, "%s ", svdnams[tj++]);
+                fprintf(yytfilep, "\n");
+              }
+              fclose(yytfilep);
+            }
+	     return(1);
+
+
+	 case WAS3ERR:  /* clobber input char */
+#ifdef YYDEBUG
+          printf("error: discard token %d\n", pcyytoken);
+#endif
+          if (pcyytoken == 0) goto yyabort; /* quit */
+	   pcyytoken = -1;
+	   goto newstate;      } /* switch */
+    } /* if */
+
+
+    /* reduction, given a production n */
+#ifdef YYDEBUG
+    printf("reduce with rule %d\n", n);
+#endif
+    if (yytflag && redcnt<YYREDMAX) redseq[redcnt++] = n;
+    yyps -= yyr2[n];
+    yypvt = yypv;
+    yypv -= yyr2[n];
+    yyval = yypv[1];
+    m = n;
+    /* find next state from goto table */
+    n = yyr1[n];
+    j = yypgo[n] + *yyps + 1;
+    if (j>=YYLAST || yychk[ tmpstate = yyact[j] ] != -n) tmpstate = yyact[yypgo[n]];
+    switch (m) { /* actions associated with grammar rules */
+
+      case 6:
+# line 55 "AS.y"
+      { printf("\nDeclaracion de variable\n"); } break;
+      case 7:
+# line 58 "AS.y"
+      { tipo_dato = PR_INT; } break;
+      case 8:
+# line 59 "AS.y"
+      { tipo_dato = PR_REAL; } break;
+      case 9:
+# line 60 "AS.y"
+      { tipo_dato = PR_STRING; } break;
+      case 12:
+# line 67 "AS.y"
+      {
+      									#ifdef MI_DEBUG
+      										printf("%s\n",buscarEnTOS(yypvt[-1]));
+      									#endif
+      									insertarNodoEnPolaca(0, TOS[yypvt[-1]]);
+
+									#ifdef MI_DEBUG
+      										printf(":=\n");
+      									#endif
+      									insertarValorEnPolaca(1, ":=");
+      								} break;
+      case 19:
+# line 87 "AS.y"
+      { printf("\nAsignacion\n"); } break;
+      case 22:
+# line 92 "AS.y"
+      {
+      										#ifdef MI_DEBUG
+      											printf("++\n");
+      										#endif
+      										insertarNodoEnPolaca(0, TOS[yypvt[-2]]);
+      										insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
+      										insertarValorEnPolaca(1, "++");
+      									  } break;
+      case 25:
+# line 104 "AS.y"
+      { printf("\nSentencia IF\n"); } break;
+      case 26:
+# line 105 "AS.y"
+      { printf("\nSentencia IF con ELSE\n"); } break;
+      case 29:
+# line 111 "AS.y"
+      { printf("\nCondicion simple\n"); } break;
+      case 30:
+# line 114 "AS.y"
+      { printf("\nCondicion multiple\n"); } break;
+      case 31:
+# line 115 "AS.y"
+      { printf("\nCondicion NOT\n"); } break;
+      case 32:
+# line 118 "AS.y"
+      { printf("\nComparacion\n"); } break;
+      case 33:
+# line 121 "AS.y"
+      { strcpy(operadorCond, "BGE"); } break;
+      case 34:
+# line 122 "AS.y"
+      { strcpy(operadorCond, "BGT"); } break;
+      case 35:
+# line 123 "AS.y"
+      { strcpy(operadorCond, "BLE"); } break;
+      case 36:
+# line 124 "AS.y"
+      { strcpy(operadorCond, "BLT"); } break;
+      case 37:
+# line 125 "AS.y"
+      { strcpy(operadorCond, "BNE"); } break;
+      case 38:
+# line 126 "AS.y"
+      { strcpy(operadorCond, "BEQ"); } break;
+      case 39:
+# line 129 "AS.y"
+      { strcpy(operadorLogico, "AND"); } break;
+      case 40:
+# line 130 "AS.y"
+      { strcpy(operadorLogico, "OR"); } break;
+      case 41:
+# line 134 "AS.y"
+      { printf("\nIteracion WHILE\n"); } break;
+      case 42:
+# line 137 "AS.y"
+      {
+      						#ifdef MI_DEBUG
+      							printf("GET\n");
+      						#endif
+      						insertarValorEnPolaca(1, "GET");
+      					} break;
+      case 43:
+# line 145 "AS.y"
+      {
+      						#ifdef MI_DEBUG
+      							printf("PUT\n");
+      						#endif
+      						insertarValorEnPolaca(1, "PUT");
+      					} break;
+      case 44:
+# line 151 "AS.y"
+      {
+      								#ifdef MI_DEBUG
+      									printf("PUT\n");
+      								#endif
+      								insertarValorEnPolaca(1, "PUT");
+      							} break;
+      case 45:
+# line 159 "AS.y"
+      {  tipo_const = PR_STRING;
+      					if(!esCONST)
+      					{
+      						#ifdef MI_DEBUG
+      							printf("%s\n",buscarEnTOS(yypvt[-0]));
+      						#endif
+      						insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
+      					}
+      				 } break;
+      case 46:
+# line 168 "AS.y"
+      {   tipo_const = PR_INT;
+      						if(!esCONST)
+      						{
+      							#ifdef MI_DEBUG
+      								printf("%s\n",buscarEnTOS(yypvt[-0]));
+      							#endif
+      							insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
+      						}
+      					} break;
+      case 47:
+# line 177 "AS.y"
+      {   tipo_const = PR_REAL;
+      								if(!esCONST)
+      								{
+      									#ifdef MI_DEBUG
+      										printf("%s\n",buscarEnTOS(yypvt[-0]));
+      									#endif
+      									insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
+      								}
+      				   } break;
+      case 48:
+# line 188 "AS.y"
+      {
+      											#ifdef MI_DEBUG
+      												printf("+\n");
+      											#endif
+      											insertarValorEnPolaca(1, "+");
+      										} break;
+      case 49:
+# line 194 "AS.y"
+      {
+      												#ifdef MI_DEBUG
+      													printf("-\n");
+      												#endif
+      												insertarValorEnPolaca(1, "-");
+      											} break;
+      case 51:
+# line 203 "AS.y"
+      {
+      											#ifdef MI_DEBUG
+      												printf("*\n");
+      											#endif
+      											insertarValorEnPolaca(1, "*");
+      										} break;
+      case 52:
+# line 209 "AS.y"
+      {
+      											#ifdef MI_DEBUG
+      												printf("/\n");
+      											#endif
+      											insertarValorEnPolaca(1, "/");
+      										} break;
+      case 54:
+# line 218 "AS.y"
+      {
+      											yyval = yypvt[-1];
+      										} break;
+      case 55:
+# line 221 "AS.y"
+      {
+      				#ifdef MI_DEBUG
+      					printf("%s\n",buscarEnTOS(yypvt[-0]));
+      				#endif
+      				insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
+      			} break;
+      case 57:
+# line 230 "AS.y"
+      { printf("\nQequal\n"); } break;
+      case 60:
+# line 235 "AS.y"
+      { printf("\nLET\n"); } break;    }
+    goto enstack;
 }
