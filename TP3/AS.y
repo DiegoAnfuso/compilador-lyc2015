@@ -11,7 +11,7 @@ Villaverde, Leonel
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-//#define MI_DEBUG 1
+#define MI_DEBUG 1
 %}
 
 /* -------------------------------------------------------------------------- */
@@ -44,7 +44,7 @@ Villaverde, Leonel
 programa_principal : programa 
 ;
 
-programa : PR_DECLARE OP_PABRE declaraciones OP_PCIERRA PR_ENDDECLARE sentencias |
+programa : PR_DECLARE OP_PABRE 	declaraciones OP_PCIERRA PR_ENDDECLARE sentencias |
 		   sentencias
 ;
 		   
@@ -52,7 +52,11 @@ declaraciones : declaracion |
 				declaraciones SEP_LISTA declaracion
 ;
 
-declaracion : ID SEP_DOSP tipo_variable { printf("\nDeclaracion de variable\n"); }
+declaracion : ID SEP_DOSP tipo_variable 	{ 
+												#ifdef MI_DEBUG 
+													printf("\nDeclaracion de variable\n"); 
+												#endif
+											}
 ;
 
 tipo_variable : PR_INT    { tipo_dato = PR_INT; }
@@ -79,14 +83,16 @@ sentencia : asignacion SEP_SENT {
 			decision |
 			entrada SEP_SENT |
 			salida SEP_SENT |
-			/*def_constante SEP_SENT |*/
 			PR_CONST ID OP_ASIG expresion SEP_SENT |
 			let SEP_SENT
 ;
 
-asignacion : ID OP_ASIG expresion { printf("\nAsignacion\n"); }|
-			 ID OP_ASIG concatenacion |
-			 ID OP_ASIG qequal
+asignacion : ID OP_ASIG expresion 	{ 
+										#ifdef MI_DEBUG 
+											printf("\nAsignacion\n"); 
+										#endif
+									}|
+			 ID OP_ASIG concatenacion 
 ;
 
 concatenacion : cadena OP_CONCAT cadena { 
@@ -101,21 +107,99 @@ concatenacion : cadena OP_CONCAT cadena {
 cadena : ID | CTE_STRING
 ;
 
-decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias PR_ENDIF { printf("\nSentencia IF\n"); }|
-		   PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias PR_ELSE sentencias PR_ENDIF { printf("\nSentencia IF con ELSE\n"); }
+decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN 	sentencias PR_ENDIF 	{ 
+																				#ifdef MI_DEBUG 
+																					printf("\nSentencia IF\n"); 
+																				#endif
+																				int aux = pilaSaltos[--indexPilaSaltos]; 
+																				asignarSalto(aux, nroNodoPolaca);
+																				if(esCondicionMultiple == 1){																					
+																					int aux2 = pilaSaltos[--indexPilaSaltos]; 																					
+																					if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
+																						asignarSalto(aux2, nroNodoPolaca);
+																					}
+																				}
+																				
+																			}
+		|   PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias 	{ 
+																		#ifdef MI_DEBUG 
+																			printf("\nFin del THEN\n");
+																		#endif
+																		int aux = pilaSaltos[--indexPilaSaltos]; 
+																		asignarSalto(aux, nroNodoPolaca+2);	
+																		if(esCondicionMultiple == 1){																					
+																			int aux2 = pilaSaltos[--indexPilaSaltos]; 
+																			if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
+																				asignarSalto(aux2, nroNodoPolaca+2);
+																			}																			
+																		}
+																		pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;	
+																		insertarValorEnPolaca(1, "");																									
+																		insertarValorEnPolaca(1, "BI");										
+																	} PR_ELSE sentencias PR_ENDIF	{ 
+																										#ifdef MI_DEBUG 
+																											printf("\nFin del ELSE\n");
+																										#endif																										
+																										int aux = pilaSaltos[--indexPilaSaltos]; 
+																										asignarSalto(aux, nroNodoPolaca);	
+																																																			
+																									} 	
 ;		   
 
-condicion : cond_simple | cond_multiple
+condicion : cond_simple { 
+							#ifdef MI_DEBUG 
+								printf("\nCondicion simple\n"); 
+							#endif
+							esCondicionMultiple = 0;
+						}
+			| cond_multiple
 ;
 
-cond_simple : comparacion { printf("\nCondicion simple\n"); }
+cond_simple : comparacion 	
 ;
 
-cond_multiple : cond_simple op_logico cond_simple { printf("\nCondicion multiple\n"); }|
-				PR_NOT OP_PABRE comparacion OP_PCIERRA { printf("\nCondicion NOT\n"); }
+cond_multiple : comparacion op_logico	{
+											#ifdef MI_DEBUG 
+												printf("%s\n", operadorLogico); 
+											#endif
+											pilaOperadorLogico[indexPilaOperadorLogico++] = $2;
+											if($2 == PR_OR){
+												invertirOperadorCondicional();
+												posSaltoPrimeraCondicion = nroNodoPolaca-2;
+												#ifdef MI_DEBUG 
+													printf("%s\n", "Apilando salto para OR"); 
+												#endif
+											} 
+										}
+										
+										comparacion { 
+														#ifdef MI_DEBUG 
+															printf("%s\n", operadorLogico); 
+														#endif
+														if($2 == PR_OR){
+															asignarSalto(posSaltoPrimeraCondicion, nroNodoPolaca);
+															#ifdef MI_DEBUG 
+																printf("%s\n", "Asignando salto para OR"); 
+															#endif
+														}
+														esCondicionMultiple = 1;														
+													}
+			|	PR_NOT OP_PABRE comparacion OP_PCIERRA 	{ 
+															#ifdef MI_DEBUG 
+																printf("NOT\n"); 
+															#endif
+															invertirOperadorCondicional();
+															esCondicionMultiple = 0;
+														}
 ;
 
-comparacion : expresion comparador expresion { printf("\nComparacion\n"); }
+comparacion : expresion comparador expresion 	{ 
+													insertarValorEnPolaca(1, "CMP");
+													pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;
+													insertarValorEnPolaca(0, ""); 
+													posicionOperadorComparacion = nroNodoPolaca;
+													insertarValorEnPolaca(1, operadorCond); 
+												}
 ;
 
 comparador      : OP_MENOR      { strcpy(operadorCond, "BGE"); }
@@ -131,7 +215,30 @@ op_logico           : PR_AND { strcpy(operadorLogico, "AND"); }
                     ;
 
 
-iteracion: PR_WHILE OP_PABRE condicion OP_PCIERRA sentencias PR_END { printf("\nIteracion WHILE\n"); }
+iteracion: PR_WHILE { 
+						#ifdef MI_DEBUG 
+							printf("\nComienzo Iteracion WHILE\n"); 
+						#endif
+						
+						pilaSaltos[indexPilaSaltos++] = nroNodoPolaca; 													
+					} OP_PABRE condicion OP_PCIERRA sentencias PR_END	{ 
+																			#ifdef MI_DEBUG 
+																				printf("\nFin Iteracion WHILE\n"); 
+																			#endif
+																			int aux = pilaSaltos[--indexPilaSaltos]; 
+																			asignarSalto(aux, nroNodoPolaca +2);
+																			if(esCondicionMultiple == 1){																					
+																				int aux2 = pilaSaltos[--indexPilaSaltos]; 
+																				if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
+																					asignarSalto(aux2, nroNodoPolaca + 2);
+																				}
+																			}																		
+																			
+																			aux = pilaSaltos[--indexPilaSaltos]; 
+																			insertarValorEnPolaca(1, "");
+																			asignarSalto(nroNodoPolaca-1, aux);
+																			insertarValorEnPolaca(1, "BI");																			
+																		}
 ;
 
 entrada: PR_GET ID  {
@@ -197,7 +304,8 @@ expresion : expresion OP_SUMA termino 	{
 												#endif
 												insertarValorEnPolaca(1, "-"); 
 											}
-			| termino
+			| termino 
+			| qequal
 ;
 
 termino : termino OP_MULTIPLI factor 	{ 
@@ -1531,15 +1639,19 @@ typedef struct
 
 nodoPolaca polacaInversa[TAMMAX];
 int nroNodoPolaca = 0;
-int posPolacaAux;
-int posSaltoCondicional[MAXLONG]; //NO SOPORTA MAS DE 30
-int cantSaltosCond = 0;
-int posSaltoIncondicional;
+int pilaSaltos[MAXLONG]; //NO SOPORTA MAS DE 30
+int indexPilaSaltos = 0;
+int posicionOperadorComparacion;
+int esCondicionMultiple = 0;
+int posSaltoPrimeraCondicion = 0;
+int pilaOperadorLogico[MAXLONG]; //NO SOPORTA MAS DE 30
+int indexPilaOperadorLogico = 0;
 
 void imprimirPolacaInversa();
 void insertarNodoEnPolaca(int, const nodoTS);
 void insertarValorEnPolaca(int, const char *);
-
+void asignarSalto(int, int);
+void invertirOperadorCondicional();
 
 void imprimirPolacaInversa()
 {
@@ -1554,7 +1666,7 @@ void imprimirPolacaInversa()
 
     for (i=0; i<nroNodoPolaca; i++)
     {
-        fprintf(archPolaca, "%s\n", polacaInversa[i].nodo.valor);
+        fprintf(archPolaca, "%d - %s\n", i, polacaInversa[i].nodo.valor);
     }
 
     if(fclose(archPolaca)!=0)
@@ -1579,12 +1691,29 @@ void insertarValorEnPolaca(int tipo, const char * valor)
     nroNodoPolaca++; 
 }
 
-void asignarSaldosCondicionales(int posicion)
+void asignarSalto(int posicion, int salto)
 {
-    int i;
+    sprintf(polacaInversa[posicion].nodo.valor, "%d", salto);
+}
 
-    for (i=0; i<cantSaltosCond; i++)
-        sprintf(polacaInversa[posSaltoCondicional[i]].nodo.valor, "%d", posicion);
+void invertirOperadorCondicional()
+{
+    char res[5];
+
+    if ( strcmp(polacaInversa[posicionOperadorComparacion].nodo.valor, "BEQ") == 0 )
+        strcpy(res, "BNE");
+    else if ( strcmp(polacaInversa[posicionOperadorComparacion].nodo.valor, "BGE") == 0 )
+        strcpy(res, "BLT");
+    else if ( strcmp(polacaInversa[posicionOperadorComparacion].nodo.valor, "BGT") == 0 )
+        strcpy(res, "BLE");
+    else if ( strcmp(polacaInversa[posicionOperadorComparacion].nodo.valor, "BLE") == 0 )
+        strcpy(res, "BGT");
+    else if ( strcmp(polacaInversa[posicionOperadorComparacion].nodo.valor, "BLT") == 0 )
+        strcpy(res, "BGE");
+    else
+        strcpy(res, "BEQ");
+    
+    strcpy(polacaInversa[posicionOperadorComparacion].nodo.valor, res);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1619,7 +1748,7 @@ int main(int argc, char* argv[])
     cerrarCodigoFuente();
 
     if (error==0){
-		printf("\nCOMPILACION EXITOSA!\n");
+		printf("\nCOMPILACION EXITOSA! %d\n",indexPilaSaltos);
 		mostrarTOS();
 		imprimirPolacaInversa();
 	} else
