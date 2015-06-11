@@ -12,6 +12,12 @@ Villaverde, Leonel
 #include <stdlib.h>
 #include <ctype.h>
 #define MI_DEBUG 1
+
+
+int esCONST = 0;
+int enDECLARE = 0;
+int yyerror(char *s);
+
 %}
 
 /* -------------------------------------------------------------------------- */
@@ -44,7 +50,9 @@ Villaverde, Leonel
 programa_principal : programa 
 ;
 
-programa : PR_DECLARE OP_PABRE 	declaraciones OP_PCIERRA PR_ENDDECLARE sentencias |
+programa : PR_DECLARE { enDECLARE = 1;
+						printf("Seteando EnDeclare %d", enDECLARE);} OP_PABRE declaraciones { enDECLARE = 0;
+						printf("Seteando EnDeclare %d", enDECLARE);} OP_PCIERRA PR_ENDDECLARE   sentencias |
 		   sentencias
 ;
 		   
@@ -56,6 +64,7 @@ declaracion : ID SEP_DOSP tipo_variable 	{
 												#ifdef MI_DEBUG 
 													printf("\nDeclaracion de variable\n"); 
 												#endif
+												TOS[$1].tipo_dato = tipo_dato;
 											}
 ;
 
@@ -83,7 +92,7 @@ sentencia : asignacion SEP_SENT {
 			decision |
 			entrada SEP_SENT |
 			salida SEP_SENT |
-			PR_CONST ID OP_ASIG expresion SEP_SENT |
+			PR_CONST	{ esCONST = 1;} ID OP_ASIG expresion SEP_SENT	{ esCONST = 0;}  |
 			let SEP_SENT
 ;
 
@@ -91,6 +100,8 @@ asignacion : ID OP_ASIG expresion 	{
 										#ifdef MI_DEBUG 
 											printf("\nAsignacion\n"); 
 										#endif
+										if(TOS[$1].tipo_dato != TOS[$3].tipo_dato)
+											yyerror("Tipos de dato incompatibles para la asignacion.");
 									}|
 			 ID OP_ASIG concatenacion 
 ;
@@ -99,6 +110,8 @@ concatenacion : cadena OP_CONCAT cadena {
 										#ifdef MI_DEBUG 
 											printf("++\n");
 										#endif
+										if(TOS[$1].tipo_dato != PR_STRING || TOS[$3].tipo_dato != PR_STRING)
+												yyerror("Solo se pueden concatenar tipo de dato STRING");
 										insertarNodoEnPolaca(0, TOS[$1]);
 										insertarNodoEnPolaca(0, TOS[$3]);
 										insertarValorEnPolaca(1, "++");
@@ -263,7 +276,7 @@ salida: PR_PUT ID 	{
 							}
 ;
 
-cte : CTE_STRING {  tipo_const = PR_STRING; 
+cte : CTE_STRING {  tipo_dato = PR_STRING; 
 					if(!esCONST)
 					{
 						#ifdef MI_DEBUG 
@@ -272,7 +285,7 @@ cte : CTE_STRING {  tipo_const = PR_STRING;
 						insertarNodoEnPolaca(0, TOS[$1]);
 					}
 				 } 
-				 | CTE_ENT  	{   tipo_const = PR_INT;  
+				 | CTE_ENT  	{   tipo_dato = PR_INT;  
 						if(!esCONST)
 						{
 							#ifdef MI_DEBUG 
@@ -281,7 +294,7 @@ cte : CTE_STRING {  tipo_const = PR_STRING;
 							insertarNodoEnPolaca(0, TOS[$1]);
 						}
 					}
-				| CTE_REAL 	{   tipo_const = PR_REAL; 
+				| CTE_REAL 	{   tipo_dato = PR_REAL; 
 								if(!esCONST)
 								{
 									#ifdef MI_DEBUG 
@@ -296,12 +309,16 @@ expresion : expresion OP_SUMA termino 	{
 											#ifdef MI_DEBUG 
 												printf("+\n");
 											#endif
+											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
+												yyerror("No es posible realizar una suma con un tipo de dato STRING");
 											insertarValorEnPolaca(1, "+");  
 										} 
 			| expresion OP_RESTA termino 	{ 
 												#ifdef MI_DEBUG 
 													printf("-\n"); 
 												#endif
+												if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
+													yyerror("No es posible realizar una resta con un tipo de dato STRING");
 												insertarValorEnPolaca(1, "-"); 
 											}
 			| termino 
@@ -312,12 +329,16 @@ termino : termino OP_MULTIPLI factor 	{
 											#ifdef MI_DEBUG 
 												printf("*\n");
 											#endif
+											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
+												yyerror("No es posible realizar una multiplicacion con un tipo de dato STRING");
 											insertarValorEnPolaca(1, "*");
 										}
 		| termino OP_DIVISION factor 	{ 
 											#ifdef MI_DEBUG 
 												printf("/\n");
 											#endif
+											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
+												yyerror("No es posible realizar una division con un tipo de dato STRING");
 											insertarValorEnPolaca(1, "/");
 										}
 		| factor
@@ -945,7 +966,6 @@ void Inf_SepDosP()
 // TABLA SIMBOLOS
 int tipo_dato;
 int tipo_const;
-int esCONST = 0;
 
 typedef struct 
 {
@@ -1339,22 +1359,26 @@ int insertarTOS(int NroToken, const char * lexema)
     } else {	
 		for (i=CANTPR; i<TOStop;  i++)
 		{
-			if (strcmp(TOS[i].nombre,lexema)==0)
-				return i;
+			if (strcmp(TOS[i].nombre,lexema)==0){
+				if ((esCONST || enDECLARE) && NroToken == ID) {
+					yyerror("Variable declarada previamente.");
+				} else {
+					return i;
+				}
+			}
 		}
 	}
-
     switch (NroToken)
     {
         case ID:
-            /*if (!enDECLARE) {
+            if (!enDECLARE && !esCONST) {
                 yyerror("Variable no declarada.");
             }
             
-            if (!esCONST)*/
+            if (!esCONST)
                 strcpy(TOS[TOStop].tipo,"ID" );
-            /*else
-                strcpy(TOS[TOStop].tipo,"CONST" );*/
+            else
+                strcpy(TOS[TOStop].tipo,"CONST" );
 
             TOS[TOStop].tipo_dato = tipo_dato;
 			strcpy(TOS[TOStop].nombre, lexema);
@@ -1407,11 +1431,11 @@ void mostrarTOS()
     fprintf(tos,"\n------------------------------ TABLA DE  SIMBOLOS ------------------------------\n");
 
     //printf ("Nro\t | Nombre\t\t\t | Tipo\t | Valor\n");
-    fprintf(tos,"Nro\t | Nombre\t\t\t | Tipo\t | Valor\t | Longitud \n");
+    fprintf(tos,"Nro\t | Nombre\t\t\t | Tipo\t | Valor\t | Longitud\t | Tipo_Dato \n");
     for (i=0; i<TOStop; i++)
     {
       //  printf ("%d     \t | %s     \t\t\t | %s     \t | %s \n",i,TOS[i].nombre, TOS[i].tipo, TOS[i].valor);
-        fprintf(tos,"%d     \t | %s     \t\t\t | %s     \t | %s \t | %d \n",i,TOS[i].nombre, TOS[i].tipo, TOS[i].valor, TOS[i].longitud);
+        fprintf(tos,"%d     \t | %s     \t\t\t | %s     \t | %s \t | %d \t | %d \n",i,TOS[i].nombre, TOS[i].tipo, TOS[i].valor, TOS[i].longitud, TOS[i].tipo_dato);
     }
     //printf("\n--------------------------------------------------------------------------------\n");
     fprintf(tos,"\n------------------------------ TABLA DE  SIMBOLOS ------------------------------\n");
@@ -1722,7 +1746,6 @@ void invertirOperadorCondicional()
 
 
 int yyparse(void);
-int yyerror(char *s);
 void warning(char *, char *);
 
 
@@ -1766,5 +1789,6 @@ void warning(char *s, char *t){
 
 int yyerror(char *s){
 	warning(s, (char *) 0);
+	mostrarTOS();
 	exit(1);    
 }

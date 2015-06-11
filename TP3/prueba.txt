@@ -1,20 +1,21 @@
---/DECLARE
-	(a1:REAL, a2:REAL, a3:REAL, a4:INT, a5:INT, s1:STRING)
-ENDDECLARE/--
-
+DECLARE
+	(a:REAL, b:REAL, c:REAL, f:INT, j:INT, o:INT, k:INT, d:INT)
+ENDDECLARE
+CONST p := 20;
+CONST t := 20;
 WHILE(a*7+b < b+c*4 OR b < 0) 
 	a := a + 1;
-	a := 0;
+	a := 1.0;
 	IF(a-8 < f*8+4 AND j*7 >= 88/2)
 	THEN
-		IF(o-8 < o+4 OR p*8 >= 2)
+		IF(c-8 < c+4 OR p*8 >= 2)
 		THEN
 			k := 8;
 		ELSE
 			t:= t / 8;
 		ENDIF
 	ELSE
-		d := c / 8 + b;
+		d := d / 8 + b;
 	ENDIF
 	
 END
