@@ -17,6 +17,8 @@ Villaverde, Leonel
 int esCONST = 0;
 int enDECLARE = 0;
 int esLETDEFAULT = 0;
+int esPIVOT = 0;
+int idQequal = 0;
 int yyerror(char *s);
 
 %}
@@ -51,9 +53,7 @@ int yyerror(char *s);
 programa_principal : programa 
 ;
 
-programa : PR_DECLARE { enDECLARE = 1;
-						printf("Seteando EnDeclare %d", enDECLARE);} OP_PABRE declaraciones { enDECLARE = 0;
-						printf("Seteando EnDeclare %d", enDECLARE);} OP_PCIERRA PR_ENDDECLARE   sentencias |
+programa : PR_DECLARE { enDECLARE = 1;} OP_PABRE declaraciones { enDECLARE = 0;} OP_PCIERRA PR_ENDDECLARE   sentencias |
 		   sentencias
 ;
 		   
@@ -78,23 +78,16 @@ sentencias : sentencia |
 			sentencias sentencia
 ;
 
-sentencia : asignacion SEP_SENT { 
-									
-									#ifdef MI_DEBUG 
-										printf(":=\n");
-									#endif  
-									insertarValorEnPolaca(1, ":=");
-								}
+sentencia : asignacion SEP_SENT 
 			| iteracion |
 			decision |
 			entrada SEP_SENT |
 			salida SEP_SENT |
 			inicio_const id OP_ASIG expresion SEP_SENT	{ 
-																			esCONST = 0;
-																			printf("\nCONST id %d, exp %d",$2, $4);
-																			strcpy(TOS[$2].valor, TOS[$4].valor);
-																			TOS[$2].tipo_dato = TOS[$4].tipo_dato;
-																		}  |
+															esCONST = 0;
+															strcpy(TOS[$2].valor, TOS[$4].valor);
+															TOS[$2].tipo_dato = TOS[$4].tipo_dato;
+														}  |
 			let SEP_SENT
 ;
 
@@ -110,9 +103,24 @@ asignacion : id OP_ASIG expresion 	{
 											yyerror("No se puede realizar una asignacion a una constante con nombre.");
 										if(TOS[$1].tipo_dato != TOS[$3].tipo_dato)
 											yyerror("Tipos de dato incompatibles para la asignacion.");
-										
+										#ifdef MI_DEBUG 
+											printf(":=\n");
+										#endif  
+										insertarValorEnPolaca(1, ":=");
 									}|
-			 id OP_ASIG concatenacion 
+			 id OP_ASIG concatenacion |
+			 id OP_ASIG qequal {
+									#ifdef MI_DEBUG 
+										printf("\nQequal");
+									#endif  
+									if(TOS[$1].tipo_dato != PR_INT)
+										yyerror("Tipo de dato incompatible para la asignacion de QEqual");
+									// ASIGNO ID EN LOS LUGARES RESERVADOS DURANTE LA GENERACION DE LAS COMPARACIONES
+									for(int i = 0; i < indexPilaPosIdQequal; i++){
+										polacaInversa[pilaPosIdQequal[i]].nodo = TOS[$1];
+									}
+									indexPilaPosIdQequal = 0;
+								}
 ;
 
 concatenacion : cadena OP_CONCAT cadena { 
@@ -124,6 +132,7 @@ concatenacion : cadena OP_CONCAT cadena {
 										insertarNodoEnPolaca(0, TOS[$1]);
 										insertarNodoEnPolaca(0, TOS[$3]);
 										insertarValorEnPolaca(1, "++");
+										insertarValorEnPolaca(1, ":=");
 									  }
 ;
 cadena : ID | CTE_STRING
@@ -163,8 +172,7 @@ decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN 	sentencias PR_ENDIF 	{
 																											printf("\nFin del ELSE\n");
 																										#endif																										
 																										int aux = pilaSaltos[--indexPilaSaltos]; 
-																										asignarSalto(aux, nroNodoPolaca);	
-																																																			
+																										asignarSalto(aux, nroNodoPolaca);																																																				
 																									} 	
 ;		   
 
@@ -332,13 +340,11 @@ expresion : expresion OP_SUMA termino 	{
 												insertarValorEnPolaca(1, "-");
 											}
 			| termino 
-			| qequal
 ;
 
 termino : termino OP_MULTIPLI factor 	{ 
 											#ifdef MI_DEBUG 
 												printf("*\n");
-												printf("Primer op %s. Segundo op %s\n", TOS[$1].nombre, TOS[$3].nombre);
 											#endif														
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una multiplicacion con un tipo de dato STRING");
@@ -347,7 +353,6 @@ termino : termino OP_MULTIPLI factor 	{
 		| termino OP_DIVISION factor 	{ 
 											#ifdef MI_DEBUG 
 												printf("/\n");
-												printf("Primer op %s. Segundo op %s\n", TOS[$1].nombre, TOS[$3].nombre);
 											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una division con un tipo de dato STRING");
@@ -373,9 +378,23 @@ id : ID {
 			}
 ;
 
-qequal : PR_QEQUAL OP_PABRE expresion SEP_LISTA OP_CABRE lista_expresiones OP_CCIERRA OP_PCIERRA { printf("\nQequal\n"); }
+qequal : PR_QEQUAL OP_PABRE {								
+								// INICIALIZA EL ID EN 0
+								insertarValorEnPolaca(0, "0");
+								insertarValorEnPolaca(1, ":=");	
+								esPIVOT = 1;
+							} expresion {	
+											esPIVOT = 0;
+											insertarExpresionPivotQequal();										
+										} SEP_LISTA OP_CABRE lista_expresiones OP_CCIERRA OP_PCIERRA 
 ;
-lista_expresiones : expresion | lista_expresiones SEP_LISTA expresion
+lista_expresiones : expresion	{
+									insertarComparacionQequal();
+								}| lista_expresiones SEP_LISTA 	{																		
+																	insertarExpresionPivotQequal();
+																} expresion {
+																				insertarComparacionQequal();	
+																			}
 ;
 
 let : PR_LET lista_let let_default expresion 	{ 
@@ -408,8 +427,7 @@ let_default : PR_DEFAULT 	{
 						
 
 asig_let : id  SEP_DOSP expresion	{
-							insertarValorEnPolaca(1, ":=");							
-							printf("Tipo del ID: %d. Tipo de la exp: %d, Separador: %d", $1 ,$3, $2); 
+							insertarValorEnPolaca(1, ":=");		
 							if(TOS[$1].tipo_dato != TOS[$3].tipo_dato){
 								yyerror("Tipos de dato incompatibles para la asignacion.");
 							}
@@ -1442,24 +1460,18 @@ int insertarTOS(int NroToken, const char * lexema)
 			strcpy(TOS[TOStop].valor, lexema);
             break;        
         case CTE_ENT:
-			//strcpy(aux,"_");
-            //strcat(aux, lexema);
             strcpy(TOS[TOStop].tipo,"CTE_ENT");
             TOS[TOStop].tipo_dato = PR_INT;
 			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_REAL:
-			//strcpy(aux,"_");
-            //strcat(aux, lexema);
             strcpy(TOS[TOStop].tipo,"CTE_REAL");
             TOS[TOStop].tipo_dato = PR_REAL;
 			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_STRING:
-			//strcpy(aux,"_");
-            //strcat(aux, auxStr);
             strcpy(TOS[TOStop].tipo,"CTE_STRING" );
             TOS[TOStop].tipo_dato = PR_STRING;
             TOS[TOStop].longitud = (strlen(auxStr));
@@ -1734,11 +1746,19 @@ int nroNodoPolacaLetDefault = 0;
 nodoPolaca polacaIdLet[TAMMAX];
 int nroNodoPolacaIdLet = 0;
 
+nodoPolaca polacaPivot[TAMMAX];
+int nroNodoPolacaPivot = 0;
+int pilaPosIdQequal[100]; 
+int indexPilaPosIdQequal = 0;
+
 void imprimirPolacaInversa();
 void insertarNodoEnPolaca(int, const nodoTS);
 void insertarValorEnPolaca(int, const char *);
 void asignarSalto(int, int);
 void invertirOperadorCondicional();
+
+void insertarExpresionPivotQequal();
+void insertarComparacionQequal();
 
 void imprimirPolacaInversa()
 {
@@ -1770,6 +1790,10 @@ void insertarNodoEnPolaca(int tipo, const nodoTS nodo)
 		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo; 
 		polacaLetDefault[nroNodoPolacaLetDefault].nodo = nodo;
 		nroNodoPolacaLetDefault++;
+	} if(esPIVOT){
+		polacaPivot[nroNodoPolacaPivot].tipo = tipo; 
+		polacaPivot[nroNodoPolacaPivot].nodo = nodo;
+		nroNodoPolacaPivot++;
 	} else {
 		polacaInversa[nroNodoPolaca].tipo = tipo; 
 		polacaInversa[nroNodoPolaca].nodo = nodo;
@@ -1784,6 +1808,10 @@ void insertarValorEnPolaca(int tipo, const char * valor)
 		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo; 
 		strcpy(polacaLetDefault[nroNodoPolacaLetDefault].nodo.valor, valor);
 		nroNodoPolacaLetDefault++; 
+	} if(esPIVOT){
+		polacaPivot[nroNodoPolacaPivot].tipo = tipo; 
+		strcpy(polacaPivot[nroNodoPolacaPivot].nodo.valor, valor);
+		nroNodoPolacaPivot++;
 	} else {
 		polacaInversa[nroNodoPolaca].tipo = tipo; 
 		strcpy(polacaInversa[nroNodoPolaca].nodo.valor, valor);
@@ -1816,6 +1844,28 @@ void invertirOperadorCondicional()
     
     strcpy(polacaInversa[posicionOperadorComparacion].nodo.valor, res);
 }
+
+void insertarExpresionPivotQequal(){
+	for(int i = 0; i < nroNodoPolacaPivot; i++){
+		polacaInversa[nroNodoPolaca] = polacaPivot[i];														
+		nroNodoPolaca++;	
+	}	
+}
+
+void insertarComparacionQequal(){
+	insertarValorEnPolaca(1, "CMP");
+	asignarSalto(nroNodoPolaca, nroNodoPolaca+7); // BNE,id,id,1,+,:=,___
+	nroNodoPolaca++;	
+	insertarValorEnPolaca(1, "BNE");
+	pilaPosIdQequal[indexPilaPosIdQequal++] = nroNodoPolaca;
+	insertarValorEnPolaca(1, " ");		
+	pilaPosIdQequal[indexPilaPosIdQequal++] = nroNodoPolaca;
+	insertarValorEnPolaca(1, " ");	
+	insertarValorEnPolaca(0, "1");													
+	insertarValorEnPolaca(1, "+");		
+	insertarValorEnPolaca(1, ":=");		
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*                                      MAIN                                  */
