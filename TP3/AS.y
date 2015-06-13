@@ -16,6 +16,7 @@ Villaverde, Leonel
 
 int esCONST = 0;
 int enDECLARE = 0;
+int esLETDEFAULT = 0;
 int yyerror(char *s);
 
 %}
@@ -78,11 +79,7 @@ sentencias : sentencia |
 ;
 
 sentencia : asignacion SEP_SENT { 
-									#ifdef MI_DEBUG 
-										printf("%s\n",buscarEnTOS($1)); 
-									#endif
-									insertarNodoEnPolaca(0, TOS[$1]);
-
+									
 									#ifdef MI_DEBUG 
 										printf(":=\n");
 									#endif  
@@ -92,18 +89,30 @@ sentencia : asignacion SEP_SENT {
 			decision |
 			entrada SEP_SENT |
 			salida SEP_SENT |
-			PR_CONST	{ esCONST = 1;} ID OP_ASIG expresion SEP_SENT	{ esCONST = 0;}  |
+			inicio_const id OP_ASIG expresion SEP_SENT	{ 
+																			esCONST = 0;
+																			printf("\nCONST id %d, exp %d",$2, $4);
+																			strcpy(TOS[$2].valor, TOS[$4].valor);
+																			TOS[$2].tipo_dato = TOS[$4].tipo_dato;
+																		}  |
 			let SEP_SENT
 ;
 
-asignacion : ID OP_ASIG expresion 	{ 
+inicio_const: PR_CONST { esCONST = 1;} 
+;
+
+asignacion : id OP_ASIG expresion 	{ 
 										#ifdef MI_DEBUG 
 											printf("\nAsignacion\n"); 
+											printf("%s\n",buscarEnTOS($1)); 
 										#endif
+										if(strcmp(TOS[$1].tipo,"CONST") == 0)
+											yyerror("No se puede realizar una asignacion a una constante con nombre.");
 										if(TOS[$1].tipo_dato != TOS[$3].tipo_dato)
 											yyerror("Tipos de dato incompatibles para la asignacion.");
+										
 									}|
-			 ID OP_ASIG concatenacion 
+			 id OP_ASIG concatenacion 
 ;
 
 concatenacion : cadena OP_CONCAT cadena { 
@@ -254,7 +263,7 @@ iteracion: PR_WHILE {
 																		}
 ;
 
-entrada: PR_GET ID  {
+entrada: PR_GET id  {
 						#ifdef MI_DEBUG 
 							printf("GET\n");
 						#endif
@@ -262,7 +271,7 @@ entrada: PR_GET ID  {
 					}
 ;
 
-salida: PR_PUT ID 	{
+salida: PR_PUT id 	{
 						#ifdef MI_DEBUG 
 							printf("PUT\n");
 						#endif    
@@ -311,7 +320,7 @@ expresion : expresion OP_SUMA termino 	{
 											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una suma con un tipo de dato STRING");
-											insertarValorEnPolaca(1, "+");  
+											insertarValorEnPolaca(1, "+"); 					
 										} 
 			| expresion OP_RESTA termino 	{ 
 												#ifdef MI_DEBUG 
@@ -319,7 +328,7 @@ expresion : expresion OP_SUMA termino 	{
 												#endif
 												if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 													yyerror("No es posible realizar una resta con un tipo de dato STRING");
-												insertarValorEnPolaca(1, "-"); 
+												insertarValorEnPolaca(1, "-");
 											}
 			| termino 
 			| qequal
@@ -328,7 +337,8 @@ expresion : expresion OP_SUMA termino 	{
 termino : termino OP_MULTIPLI factor 	{ 
 											#ifdef MI_DEBUG 
 												printf("*\n");
-											#endif
+												printf("Primer op %s. Segundo op %s\n", TOS[$1].nombre, TOS[$3].nombre);
+											#endif														
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una multiplicacion con un tipo de dato STRING");
 											insertarValorEnPolaca(1, "*");
@@ -336,6 +346,7 @@ termino : termino OP_MULTIPLI factor 	{
 		| termino OP_DIVISION factor 	{ 
 											#ifdef MI_DEBUG 
 												printf("/\n");
+												printf("Primer op %s. Segundo op %s\n", TOS[$1].nombre, TOS[$3].nombre);
 											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una division con un tipo de dato STRING");
@@ -347,13 +358,18 @@ termino : termino OP_MULTIPLI factor 	{
 factor : OP_PABRE expresion OP_PCIERRA 	{ 
 											$$ = $2; 
 										}
-		|ID {  
+		|id 
+		|cte
+;
+
+id : ID {  
 				#ifdef MI_DEBUG 
 					printf("%s\n",buscarEnTOS($1));
 				#endif
-				insertarNodoEnPolaca(0, TOS[$1]);
+				if(!esCONST)
+					insertarNodoEnPolaca(0, TOS[$1]);
+				$$ = $1;
 			}
-		|cte
 ;
 
 qequal : PR_QEQUAL OP_PABRE expresion SEP_LISTA OP_CABRE lista_expresiones OP_CCIERRA OP_PCIERRA { printf("\nQequal\n"); }
@@ -361,10 +377,49 @@ qequal : PR_QEQUAL OP_PABRE expresion SEP_LISTA OP_CABRE lista_expresiones OP_CC
 lista_expresiones : expresion | lista_expresiones SEP_LISTA expresion
 ;
 
-let : PR_LET lista_let PR_DEFAULT expresion { printf("\nLET\n"); }
+let : PR_LET lista_let let_default expresion 	{ 
+													esLETDEFAULT = 0;
+													printf("\nLET\n"); 
+													for(int i = 0; i < nroNodoPolacaIdLet; i++){
+														//chequeo tipos para asignacion
+														if(polacaIdLet[i].nodo.tipo_dato != polacaLetDefault[0].nodo.tipo_dato)
+															yyerror("Tipo de dato incompatible en la asignacion del valor por default");
+														// inserto ID que no tenia expresion
+														polacaInversa[nroNodoPolaca] = polacaIdLet[i];														
+														nroNodoPolaca++;															
+														// inserto expresion por default
+														for(int j = 0; j < nroNodoPolacaLetDefault; j++){
+															polacaInversa[nroNodoPolaca] = polacaLetDefault[j];
+															nroNodoPolaca++;
+														}														
+														insertarValorEnPolaca(1, ":=");		
+													}
+													nroNodoPolacaIdLet = 0;
+													nroNodoPolacaLetDefault = 0;
+													
+												}
 ;
 
-asig_let : ID SEP_DOSP expresion | ID
+let_default : PR_DEFAULT 	{
+								esLETDEFAULT = 1;
+							}
+;
+						
+
+asig_let : id  SEP_DOSP expresion	{
+							insertarValorEnPolaca(1, ":=");							
+							printf("Tipo del ID: %d. Tipo de la exp: %d, Separador: %d", $1 ,$3, $2); 
+							if(TOS[$1].tipo_dato != TOS[$3].tipo_dato){
+								yyerror("Tipos de dato incompatibles para la asignacion.");
+							}
+						}	
+						| ID 	{		
+									polacaIdLet[nroNodoPolacaIdLet].tipo = 0;
+									polacaIdLet[nroNodoPolacaIdLet].nodo = TOS[$1];
+									nroNodoPolacaIdLet++;
+								}
+								
+							
 ;
 lista_let : asig_let | lista_let SEP_LISTA asig_let
 ;
@@ -399,7 +454,7 @@ int TOStop = 0;		  // ?ndice de la TOS
 /* -------------------------------------------------------------------------- */
 #define ESTADO_FINAL 20
 #define MAXLONG 30
-#define TAMMAX 100
+#define TAMMAX 1000
 #define TAMTOKEN 1000
 #define CANTPR 21
 #define NV -1  //ESTADO DE CARACTER NO V?LIDO
@@ -621,19 +676,20 @@ void Inf_Cte()
 
         double cte = atof(token);
 
-        if (cte > FLT_MAX)
-        {
-            printf("\n ERROR: # Se excede el rango para un REAL. \n");
-            printf("\n - Analisis Lexico INTERRUMPIDO - \n");
-            exit(1);
-        }
-        if (cte < FLT_MIN)
-        {
-            printf("\n ERROR: # Se excede el rango para un REAL. \n");
-            printf("\n - Analisis Lexico INTERRUMPIDO - \n");
-            exit(1);
-        }
-
+		if(cte != 0.0){
+			if (cte > FLT_MAX)
+			{
+				printf("\n ERROR: # Se excede el rango para un REAL. \n");
+				printf("\n - Analisis Lexico INTERRUMPIDO - \n");
+				exit(1);
+			}
+			if (cte < FLT_MIN)
+			{
+				printf("\n ERROR: # Se excede el rango para un REAL. \n");
+				printf("\n - Analisis Lexico INTERRUMPIDO - \n");
+				exit(1);
+			}
+		}
     }
 
     yylval= insertarTOS(NroToken, token); // TOS
@@ -1385,28 +1441,28 @@ int insertarTOS(int NroToken, const char * lexema)
 			strcpy(TOS[TOStop].valor, lexema);
             break;        
         case CTE_ENT:
-			strcpy(aux,"_");
-            strcat(aux, lexema);
+			//strcpy(aux,"_");
+            //strcat(aux, lexema);
             strcpy(TOS[TOStop].tipo,"CTE_ENT");
             TOS[TOStop].tipo_dato = PR_INT;
-			strcpy(TOS[TOStop].nombre, aux);
+			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_REAL:
-			strcpy(aux,"_");
-            strcat(aux, lexema);
+			//strcpy(aux,"_");
+            //strcat(aux, lexema);
             strcpy(TOS[TOStop].tipo,"CTE_REAL");
             TOS[TOStop].tipo_dato = PR_REAL;
-			strcpy(TOS[TOStop].nombre, aux);
+			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_STRING:
-			strcpy(aux,"_");
-            strcat(aux, auxStr);
+			//strcpy(aux,"_");
+            //strcat(aux, auxStr);
             strcpy(TOS[TOStop].tipo,"CTE_STRING" );
             TOS[TOStop].tipo_dato = PR_STRING;
             TOS[TOStop].longitud = (strlen(auxStr));
-			strcpy(TOS[TOStop].nombre, aux);
+			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, auxStr);
             break;
     }
@@ -1668,8 +1724,14 @@ int indexPilaSaltos = 0;
 int posicionOperadorComparacion;
 int esCondicionMultiple = 0;
 int posSaltoPrimeraCondicion = 0;
-int pilaOperadorLogico[MAXLONG]; //NO SOPORTA MAS DE 30
+int pilaOperadorLogico[100]; 
 int indexPilaOperadorLogico = 0;
+
+nodoPolaca polacaLetDefault[TAMMAX];
+int nroNodoPolacaLetDefault = 0;
+
+nodoPolaca polacaIdLet[TAMMAX];
+int nroNodoPolacaIdLet = 0;
 
 void imprimirPolacaInversa();
 void insertarNodoEnPolaca(int, const nodoTS);
@@ -1703,16 +1765,30 @@ void imprimirPolacaInversa()
 
 void insertarNodoEnPolaca(int tipo, const nodoTS nodo)
 {
-    polacaInversa[nroNodoPolaca].tipo = tipo; 
-    polacaInversa[nroNodoPolaca].nodo = nodo;
-    nroNodoPolaca++;
+	if(esLETDEFAULT){
+		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo; 
+		polacaLetDefault[nroNodoPolacaLetDefault].nodo = nodo;
+		nroNodoPolacaLetDefault++;
+	} else {
+		polacaInversa[nroNodoPolaca].tipo = tipo; 
+		polacaInversa[nroNodoPolaca].nodo = nodo;
+		nroNodoPolaca++;
+	}
+    
 }
 
 void insertarValorEnPolaca(int tipo, const char * valor)
 {
-    polacaInversa[nroNodoPolaca].tipo = tipo; 
-    strcpy(polacaInversa[nroNodoPolaca].nodo.valor, valor);
-    nroNodoPolaca++; 
+	if(esLETDEFAULT){
+		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo; 
+		strcpy(polacaLetDefault[nroNodoPolacaLetDefault].nodo.valor, valor);
+		nroNodoPolacaLetDefault++; 
+	} else {
+		polacaInversa[nroNodoPolaca].tipo = tipo; 
+		strcpy(polacaInversa[nroNodoPolaca].nodo.valor, valor);
+		nroNodoPolaca++; 
+	}
+    
 }
 
 void asignarSalto(int posicion, int salto)

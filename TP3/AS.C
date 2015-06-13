@@ -10,6 +10,7 @@
 
 int esCONST = 0;
 int enDECLARE = 0;
+int esLETDEFAULT = 0;
 int yyerror(char *s);
 
 #define PR_DECLARE 257
@@ -67,7 +68,7 @@ int yyerror(char *s);
 YYSTYPE yylval, yyval;
 #define YYERRCODE 256
 
-# line 373 "AS.y"
+# line 428 "AS.y"
 
 
 /* -------------------------------------------------------------------------- */
@@ -97,7 +98,7 @@ int TOStop = 0;		  // ?ndice de la TOS
 /* -------------------------------------------------------------------------- */
 #define ESTADO_FINAL 20
 #define MAXLONG 30
-#define TAMMAX 100
+#define TAMMAX 1000
 #define TAMTOKEN 1000
 #define CANTPR 21
 #define NV -1  //ESTADO DE CARACTER NO V?LIDO
@@ -319,19 +320,20 @@ void Inf_Cte()
 
         double cte = atof(token);
 
-        if (cte > FLT_MAX)
-        {
-            printf("\n ERROR: # Se excede el rango para un REAL. \n");
-            printf("\n - Analisis Lexico INTERRUMPIDO - \n");
-            exit(1);
-        }
-        if (cte < FLT_MIN)
-        {
-            printf("\n ERROR: # Se excede el rango para un REAL. \n");
-            printf("\n - Analisis Lexico INTERRUMPIDO - \n");
-            exit(1);
-        }
-
+		if(cte != 0.0){
+			if (cte > FLT_MAX)
+			{
+				printf("\n ERROR: # Se excede el rango para un REAL. \n");
+				printf("\n - Analisis Lexico INTERRUMPIDO - \n");
+				exit(1);
+			}
+			if (cte < FLT_MIN)
+			{
+				printf("\n ERROR: # Se excede el rango para un REAL. \n");
+				printf("\n - Analisis Lexico INTERRUMPIDO - \n");
+				exit(1);
+			}
+		}
     }
 
     yylval= insertarTOS(NroToken, token); // TOS
@@ -1083,28 +1085,28 @@ int insertarTOS(int NroToken, const char * lexema)
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_ENT:
-			strcpy(aux,"_");
-            strcat(aux, lexema);
+			//strcpy(aux,"_");
+            //strcat(aux, lexema);
             strcpy(TOS[TOStop].tipo,"CTE_ENT");
             TOS[TOStop].tipo_dato = PR_INT;
-			strcpy(TOS[TOStop].nombre, aux);
+			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_REAL:
-			strcpy(aux,"_");
-            strcat(aux, lexema);
+			//strcpy(aux,"_");
+            //strcat(aux, lexema);
             strcpy(TOS[TOStop].tipo,"CTE_REAL");
             TOS[TOStop].tipo_dato = PR_REAL;
-			strcpy(TOS[TOStop].nombre, aux);
+			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_STRING:
-			strcpy(aux,"_");
-            strcat(aux, auxStr);
+			//strcpy(aux,"_");
+            //strcat(aux, auxStr);
             strcpy(TOS[TOStop].tipo,"CTE_STRING" );
             TOS[TOStop].tipo_dato = PR_STRING;
             TOS[TOStop].longitud = (strlen(auxStr));
-			strcpy(TOS[TOStop].nombre, aux);
+			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, auxStr);
             break;
     }
@@ -1366,8 +1368,14 @@ int indexPilaSaltos = 0;
 int posicionOperadorComparacion;
 int esCondicionMultiple = 0;
 int posSaltoPrimeraCondicion = 0;
-int pilaOperadorLogico[MAXLONG]; //NO SOPORTA MAS DE 30
+int pilaOperadorLogico[100];
 int indexPilaOperadorLogico = 0;
+
+nodoPolaca polacaLetDefault[TAMMAX];
+int nroNodoPolacaLetDefault = 0;
+
+nodoPolaca polacaIdLet[TAMMAX];
+int nroNodoPolacaIdLet = 0;
 
 void imprimirPolacaInversa();
 void insertarNodoEnPolaca(int, const nodoTS);
@@ -1401,16 +1409,30 @@ void imprimirPolacaInversa()
 
 void insertarNodoEnPolaca(int tipo, const nodoTS nodo)
 {
-    polacaInversa[nroNodoPolaca].tipo = tipo;
-    polacaInversa[nroNodoPolaca].nodo = nodo;
-    nroNodoPolaca++;
+	if(esLETDEFAULT){
+		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo;
+		polacaLetDefault[nroNodoPolacaLetDefault].nodo = nodo;
+		nroNodoPolacaLetDefault++;
+	} else {
+		polacaInversa[nroNodoPolaca].tipo = tipo;
+		polacaInversa[nroNodoPolaca].nodo = nodo;
+		nroNodoPolaca++;
+	}
+
 }
 
 void insertarValorEnPolaca(int tipo, const char * valor)
 {
-    polacaInversa[nroNodoPolaca].tipo = tipo;
-    strcpy(polacaInversa[nroNodoPolaca].nodo.valor, valor);
-    nroNodoPolaca++;
+	if(esLETDEFAULT){
+		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo;
+		strcpy(polacaLetDefault[nroNodoPolacaLetDefault].nodo.valor, valor);
+		nroNodoPolacaLetDefault++;
+	} else {
+		polacaInversa[nroNodoPolaca].tipo = tipo;
+		strcpy(polacaInversa[nroNodoPolaca].nodo.valor, valor);
+		nroNodoPolaca++;
+	}
+
 }
 
 void asignarSalto(int posicion, int salto)
@@ -1500,146 +1522,155 @@ int yyexca[] = {
   -1, 1,
   0, -1,
   -2, 0,
-  -1, 44,
+  -1, 37,
+  301, 63,
+  -2, 70,
+  -1, 47,
   280, 25,
-  -2, 61,
-  -1, 45,
+  -2, 63,
+  -1, 48,
   280, 26,
   -2, 50,
   0,
 };
 
-#define YYNPROD 71
-#define YYLAST 276
+#define YYNPROD 73
+#define YYLAST 284
 
 int yyact[] = {
-      66,      67,      66,      67,     128,      66,      67,      84,
-      80,      81,      82,      83,     129,      59,      90,      25,
-      23,      22,      21,      91,      61,      43,      57,      48,
-      49,      58,      46,     120,      43,      85,     114,     131,
-     113,      43,      64,     118,     107,      55,      57,      48,
-      49,      58,      46,      78,      60,      57,      48,      49,
-      58,      46,      44,      48,      49,      45,      46,      11,
-      15,     102,     133,      66,      67,      16,      17,      14,
-      18,      11,      15,      74,     122,      71,      50,      16,
-      17,      14,      18,      35,      70,     101,      11,      15,
-      28,      34,      13,     121,      16,      17,      14,      18,
-       3,      11,      15,      36,      13,      11,      15,      16,
-      17,      14,      18,      16,      17,      14,      18,      98,
-      30,      13,      99,      31,      29,      77,      76,      68,
-      69,      66,      67,      65,      13,      26,     103,     127,
-      13,     110,     111,     112,     119,      56,       5,      33,
-      39,      41,      63,      20,      54,      42,      32,      51,
-     125,      40,      47,      27,      79,     104,      75,      53,
-       4,      52,     123,       5,      38,      12,      24,      10,
-      37,       9,       8,       7,       6,     109,      89,      62,
-      19,       2,       1,      46,       0,       0,       0,       0,
-       0,       0,       0,       0,      72,       0,       0,       0,
-       0,       0,       0,       0,       0,       0,       0,       0,
-       0,      86,      73,      88,      87,       0,       0,      92,
-       0,       0,       0,      93,      94,     100,      59,       0,
-      97,       0,      95,      96,       0,     106,       0,       0,
-       0,      51,       0,     105,      61,       0,      65,      33,
-       0,       0,      71,       0,       0,     108,      67,      39,
-       0,       0,      79,      41,       0,      69,      42,       0,
-     120,       0,       0,       0,       0,     117,     104,      63,
-       0,       0,      20,      20,       0,       0,     126,     115,
-     116,       0,      54,      20,     129,       0,       0,     132,
-       0,      20,      56,       0,     103,     119,       0,       0,
-     124,       0,       0,       0,       0,     127,       0,       0,
-     130,       0,       0,       4,
+      70,      71,      70,      71,     131,      70,      71,      88,
+      84,      85,      86,      87,     132,      64,      94,      27,
+      25,      24,      23,      95,      65,      46,      20,      52,
+      53,      61,      49,     123,      46,      89,     117,     134,
+      96,      46,      68,     121,     111,      59,      20,      52,
+      53,      61,      49,      82,      63,      20,      52,      53,
+      61,      49,      47,      52,      53,      48,      49,      18,
+      15,     106,     136,      70,      71,      16,      17,      14,
+      19,      18,      15,      78,     125,      75,      54,      16,
+      17,      14,      19,      38,      74,     105,      18,      15,
+      30,      37,      20,     124,      16,      17,      14,      19,
+       3,      18,      15,      20,      20,      18,      15,      16,
+      17,      14,      19,      16,      17,      14,      19,     102,
+      20,      20,     103,      33,     107,      81,      80,      72,
+      73,      70,      71,      39,      20,      28,     130,     122,
+      20,     114,     115,     116,      50,      13,      42,      58,
+      45,      13,      60,      55,      67,      62,      34,     128,
+      26,      44,      50,      43,      51,      31,      32,      29,
+      36,       5,      83,     108,      79,       4,      22,      16,
+      57,      56,      35,     126,      17,      19,      41,      40,
+      12,     106,      11,      10,       9,       8,       7,       6,
+       5,     113,      69,      39,      93,      66,      21,       2,
+       1,       0,       0,       0,      76,       0,       0,       0,
+       0,       0,      77,       0,      36,       0,       0,       0,
+       0,      90,       0,       0,      92,      97,      98,       0,
+      49,      99,     100,       0,       0,       0,     104,      62,
+       0,      55,     109,       0,     101,       0,     110,       0,
+       0,       0,      91,       0,       0,      65,       0,      75,
+      71,      42,       0,     112,      73,      45,       0,      13,
+      13,       0,       0,      83,     120,     108,       0,      44,
+       0,     123,       0,      13,      13,      67,      35,      13,
+      58,       0,       0,       0,      13,       0,     129,      13,
+     118,     119,      13,       0,     132,       0,       0,     135,
+      22,      22,      60,       0,     107,     122,       0,       0,
+     127,      22,       0,       0,       0,     130,       0,      22,
+     133,       0,       0,       4,
 };
 
 int yypact[] = {
     -169,   -1000,   -1000,   -1000,    -173,   -1000,    -285,   -1000,
-   -1000,    -286,    -287,   -1000,    -288,    -158,   -1000,    -213,
-    -181,    -185,    -208,    -218,   -1000,   -1000,   -1000,   -1000,
-    -198,   -1000,    -239,    -223,    -251,   -1000,   -1000,   -1000,
-    -260,   -1000,    -281,    -255,    -160,    -163,   -1000,    -167,
-   -1000,    -204,   -1000,    -224,   -1000,   -1000,    -244,   -1000,
-   -1000,   -1000,    -251,    -227,   -1000,   -1000,    -172,    -250,
-    -276,   -1000,   -1000,    -244,    -208,    -244,    -290,   -1000,
-    -282,    -244,    -267,    -267,    -267,    -267,    -186,    -244,
-    -217,    -237,    -156,   -1000,   -1000,   -1000,    -244,    -244,
-   -1000,   -1000,   -1000,   -1000,   -1000,   -1000,    -163,   -1000,
-    -163,    -258,    -255,    -138,    -271,    -167,    -167,   -1000,
-   -1000,   -1000,   -1000,   -1000,    -274,   -1000,    -173,    -173,
-    -244,    -259,    -163,    -134,   -1000,   -1000,   -1000,   -1000,
-   -1000,   -1000,    -268,    -184,    -197,   -1000,   -1000,    -173,
-    -244,   -1000,   -1000,    -145,    -173,    -292,    -163,    -173,
-    -263,    -244,    -207,   -1000,    -163,   -1000,
+   -1000,    -286,    -287,    -198,    -288,    -158,   -1000,    -213,
+    -198,    -185,   -1000,    -208,   -1000,    -218,   -1000,   -1000,
+   -1000,   -1000,    -160,   -1000,    -239,    -223,    -251,   -1000,
+   -1000,   -1000,    -260,   -1000,    -281,   -1000,    -255,    -244,
+    -163,   -1000,    -167,   -1000,    -204,   -1000,    -224,   -1000,
+   -1000,    -244,   -1000,   -1000,   -1000,   -1000,    -251,    -227,
+   -1000,   -1000,    -172,    -250,    -276,   -1000,    -244,    -208,
+   -1000,    -244,    -290,   -1000,    -282,    -271,    -267,    -267,
+    -267,    -267,    -186,    -244,    -217,    -237,    -166,   -1000,
+   -1000,   -1000,    -244,    -244,   -1000,   -1000,   -1000,   -1000,
+   -1000,   -1000,    -163,   -1000,    -163,    -258,    -255,    -138,
+   -1000,    -167,    -167,   -1000,   -1000,   -1000,   -1000,   -1000,
+    -274,   -1000,    -173,    -173,    -244,    -259,    -163,    -139,
+   -1000,   -1000,   -1000,   -1000,   -1000,    -268,    -184,    -197,
+   -1000,   -1000,    -173,    -244,   -1000,   -1000,    -146,    -173,
+    -292,    -163,    -173,    -263,    -244,    -207,   -1000,    -163,
+   -1000,
 };
 
 int yypgo[] = {
-       0,     162,     161,     160,     159,     158,     144,     130,
-     157,     126,     156,     155,     154,     153,     151,     150,
-     125,     149,     148,     129,     135,     146,     145,     143,
-     132,     142,     141,     140,     139,     138,     128,     137,
-     133,     136,     134,     127,
+       0,     176,     175,     174,     173,     172,     149,     132,
+     169,     145,     167,     166,     165,     164,     163,     162,
+     124,     130,     160,     158,     137,     131,     155,     153,
+     152,     127,     148,     147,     146,     143,     140,     126,
+     139,     128,     135,     134,     133,     154,
 };
 
 int yyr1[] = {
        0,       1,       3,       5,       2,       2,       4,       4,
        7,       8,       8,       8,       6,       6,       9,       9,
-       9,       9,       9,      15,       9,       9,      10,      10,
-      18,      19,      19,      12,      21,      12,      20,      20,
-      22,      26,      23,      23,      24,      27,      27,      27,
-      27,      27,      27,      25,      25,      28,      11,      13,
-      14,      14,      29,      29,      29,      16,      16,      16,
-      16,      30,      30,      30,      32,      32,      32,      31,
-      33,      33,      17,      35,      35,      34,      34,
+       9,       9,       9,       9,       9,      15,      10,      10,
+      19,      20,      20,      12,      22,      12,      21,      21,
+      23,      27,      24,      24,      25,      28,      28,      28,
+      28,      28,      28,      26,      26,      29,      11,      13,
+      14,      14,      30,      30,      30,      17,      17,      17,
+      17,      31,      31,      31,      33,      33,      33,      16,
+      32,      34,      34,      18,      36,      37,      37,      35,
+      35,
 };
 
 int yyr2[] = {
        2,       1,       0,       0,       8,       1,       1,       3,
        3,       1,       1,       1,       1,       2,       2,       1,
-       1,       2,       2,       0,       6,       2,       3,       3,
+       1,       2,       2,       5,       2,       1,       3,       3,
        3,       1,       1,       7,       0,      10,       1,       1,
        1,       0,       4,       4,       3,       1,       1,       1,
        1,       1,       1,       1,       1,       0,       7,       2,
        2,       2,       1,       1,       1,       3,       3,       1,
-       1,       3,       3,       1,       3,       1,       1,       8,
-       1,       3,       4,       3,       1,       1,       3,
+       1,       3,       3,       1,       3,       1,       1,       1,
+       8,       1,       3,       4,       1,       3,       1,       1,
+       3,
 };
 
 int yychk[] = {
    -1000,      -1,      -2,     257,      -6,      -9,     -10,     -11,
-     -12,     -13,     -14,     262,     -17,     289,     270,     263,
-     268,     269,     271,      -3,      -9,     303,     303,     303,
-     -15,     303,     275,     -28,     293,     289,     289,     292,
-     -34,     -35,     289,     293,     289,     -16,     -18,     -30,
-     -31,     -19,     -32,     272,     289,     292,     293,     -29,
-     290,     291,     293,     -20,     -22,     -23,     -24,     288,
-     -16,     289,     292,     273,     304,     301,      -4,      -7,
-     289,     275,     276,     277,     278,     279,     280,     293,
-     -16,     -20,     294,     -25,     282,     281,     293,     -27,
-     284,     285,     286,     287,     283,     305,     -16,     -35,
-     -16,      -5,     304,     301,     -16,     -30,     -30,     -32,
-     -32,     -19,     289,     292,     -16,     294,     294,     274,
-     -26,     -24,     -16,     294,      -7,      -8,     259,     260,
-     261,     303,     304,      -6,      -6,     -24,     294,     258,
-     295,     267,     265,     -21,      -6,     -33,     -16,     264,
-     296,     304,      -6,     294,     -16,     265,
+     -12,     -13,     -14,     -15,     -18,     -16,     270,     263,
+     268,     269,     262,     271,     289,      -3,      -9,     303,
+     303,     303,     -16,     303,     275,     -29,     293,     -16,
+     -16,     292,     -35,     -37,     -16,     289,     293,     275,
+     -17,     -19,     -31,     -32,     -20,     -33,     272,     289,
+     292,     293,     -16,     -30,     290,     291,     293,     -21,
+     -23,     -24,     -25,     288,     -17,     292,     -36,     304,
+     273,     301,      -4,      -7,     289,     -17,     276,     277,
+     278,     279,     280,     293,     -17,     -21,     294,     -26,
+     282,     281,     293,     -28,     284,     285,     286,     287,
+     283,     305,     -17,     -37,     -17,      -5,     304,     301,
+     303,     -31,     -31,     -33,     -33,     -20,     289,     292,
+     -17,     294,     294,     274,     -27,     -25,     -17,     294,
+      -7,      -8,     259,     260,     261,     304,      -6,      -6,
+     -25,     294,     258,     295,     267,     265,     -22,      -6,
+     -34,     -17,     264,     296,     304,      -6,     294,     -17,
+     265,
 };
 
 int yydef[] = {
        0,      -2,       1,       2,       5,      12,       0,      15,
-      16,       0,       0,      19,       0,       0,      45,       0,
-       0,       0,       0,       0,      13,      14,      17,      18,
-       0,      21,       0,       0,       0,      47,      48,      49,
-       0,      69,      68,       0,       0,      22,      23,      55,
-      56,       0,      59,       0,      -2,      -2,       0,      62,
-      51,      52,       0,       0,      30,      31,      32,       0,
-       0,      61,      50,       0,       0,       0,       3,       6,
-       0,       0,       0,       0,       0,       0,       0,       0,
-       0,       0,       0,      33,      43,      44,       0,       0,
-      37,      38,      39,      40,      41,      42,      66,      70,
-      67,       0,       0,       0,       0,      53,      54,      57,
-      58,      24,      25,      26,       0,      60,       0,       0,
-       0,       0,      36,       0,       7,       8,       9,      10,
-      11,      20,       0,       0,      28,      34,      35,       0,
-       0,      46,      27,       0,       4,       0,      64,       0,
-       0,       0,       0,      63,      65,      29,
+      16,       0,       0,       0,       0,       0,      45,       0,
+       0,       0,      21,       0,      63,       0,      13,      14,
+      17,      18,       0,      20,       0,       0,       0,      47,
+      48,      49,       0,      71,       0,      -2,       0,       0,
+      22,      23,      55,      56,       0,      59,       0,      -2,
+      -2,       0,      61,      62,      51,      52,       0,       0,
+      30,      31,      32,       0,       0,      50,       0,       0,
+      68,       0,       3,       6,       0,       0,       0,       0,
+       0,       0,       0,       0,       0,       0,       0,      33,
+      43,      44,       0,       0,      37,      38,      39,      40,
+      41,      42,      67,      72,      69,       0,       0,       0,
+      19,      53,      54,      57,      58,      24,      25,      26,
+       0,      60,       0,       0,       0,       0,      36,       0,
+       7,       8,       9,      10,      11,       0,       0,      28,
+      34,      35,       0,       0,      46,      27,       0,       4,
+       0,      65,       0,       0,       0,       0,      64,      66,
+      29,
 };
 
 int *yyxi;
@@ -1831,15 +1862,15 @@ int yyparse()
     switch (m) { /* actions associated with grammar rules */
 
       case 2:
-# line 53 "AS.y"
+# line 54 "AS.y"
       { enDECLARE = 1;
       						printf("Seteando EnDeclare %d", enDECLARE);} break;
       case 3:
-# line 54 "AS.y"
+# line 55 "AS.y"
       { enDECLARE = 0;
       						printf("Seteando EnDeclare %d", enDECLARE);} break;
       case 8:
-# line 63 "AS.y"
+# line 64 "AS.y"
       {
       												#ifdef MI_DEBUG
       													printf("\nDeclaracion de variable\n");
@@ -1847,44 +1878,49 @@ int yyparse()
       												TOS[yypvt[-2]].tipo_dato = tipo_dato;
       											} break;
       case 9:
-# line 71 "AS.y"
+# line 72 "AS.y"
       { tipo_dato = PR_INT; } break;
       case 10:
-# line 72 "AS.y"
+# line 73 "AS.y"
       { tipo_dato = PR_REAL; } break;
       case 11:
-# line 73 "AS.y"
+# line 74 "AS.y"
       { tipo_dato = PR_STRING; } break;
       case 14:
-# line 80 "AS.y"
+# line 81 "AS.y"
       {
-      									#ifdef MI_DEBUG
-      										printf("%s\n",buscarEnTOS(yypvt[-1]));
-      									#endif
-      									insertarNodoEnPolaca(0, TOS[yypvt[-1]]);
 
-									#ifdef MI_DEBUG
+      									#ifdef MI_DEBUG
       										printf(":=\n");
       									#endif
       									insertarValorEnPolaca(1, ":=");
       								} break;
       case 19:
-# line 95 "AS.y"
+# line 92 "AS.y"
+      {
+      																			esCONST = 0;
+      																			printf("\nCONST id %d, exp %d",yypvt[-3], yypvt[-1]);
+      																			strcpy(TOS[yypvt[-3]].valor, TOS[yypvt[-1]].valor);
+      																			TOS[yypvt[-3]].tipo_dato = TOS[yypvt[-1]].tipo_dato;
+      																		} break;
+      case 21:
+# line 101 "AS.y"
       { esCONST = 1;} break;
-      case 20:
-# line 95 "AS.y"
-      { esCONST = 0;} break;
       case 22:
-# line 99 "AS.y"
+# line 104 "AS.y"
       {
       										#ifdef MI_DEBUG
       											printf("\nAsignacion\n");
+      											printf("%s\n",buscarEnTOS(yypvt[-2]));
       										#endif
+      										if(strcmp(TOS[yypvt[-2]].tipo,"CONST") == 0)
+      											yyerror("No se puede realizar una asignacion a una constante con nombre.");
       										if(TOS[yypvt[-2]].tipo_dato != TOS[yypvt[-0]].tipo_dato)
       											yyerror("Tipos de dato incompatibles para la asignacion.");
+
       									} break;
       case 24:
-# line 109 "AS.y"
+# line 118 "AS.y"
       {
       										#ifdef MI_DEBUG
       											printf("++\n");
@@ -1896,7 +1932,7 @@ int yyparse()
       										insertarValorEnPolaca(1, "++");
       									  } break;
       case 27:
-# line 123 "AS.y"
+# line 132 "AS.y"
       {
       																				#ifdef MI_DEBUG
       																					printf("\nSentencia IF\n");
@@ -1912,7 +1948,7 @@ int yyparse()
 
       																			} break;
       case 28:
-# line 137 "AS.y"
+# line 146 "AS.y"
       {
       																		#ifdef MI_DEBUG
       																			printf("\nFin del THEN\n");
@@ -1930,7 +1966,7 @@ int yyparse()
       																		insertarValorEnPolaca(1, "BI");
       																	} break;
       case 29:
-# line 152 "AS.y"
+# line 161 "AS.y"
       {
       																										#ifdef MI_DEBUG
       																											printf("\nFin del ELSE\n");
@@ -1940,7 +1976,7 @@ int yyparse()
 
       																									} break;
       case 30:
-# line 162 "AS.y"
+# line 171 "AS.y"
       {
       							#ifdef MI_DEBUG
       								printf("\nCondicion simple\n");
@@ -1948,7 +1984,7 @@ int yyparse()
       							esCondicionMultiple = 0;
       						} break;
       case 33:
-# line 174 "AS.y"
+# line 183 "AS.y"
       {
       											#ifdef MI_DEBUG
       												printf("%s\n", operadorLogico);
@@ -1963,7 +1999,7 @@ int yyparse()
       											}
       										} break;
       case 34:
-# line 188 "AS.y"
+# line 197 "AS.y"
       {
       														#ifdef MI_DEBUG
       															printf("%s\n", operadorLogico);
@@ -1977,7 +2013,7 @@ int yyparse()
       														esCondicionMultiple = 1;
       													} break;
       case 35:
-# line 200 "AS.y"
+# line 209 "AS.y"
       {
       															#ifdef MI_DEBUG
       																printf("NOT\n");
@@ -1986,7 +2022,7 @@ int yyparse()
       															esCondicionMultiple = 0;
       														} break;
       case 36:
-# line 209 "AS.y"
+# line 218 "AS.y"
       {
       													insertarValorEnPolaca(1, "CMP");
       													pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;
@@ -1995,31 +2031,31 @@ int yyparse()
       													insertarValorEnPolaca(1, operadorCond);
       												} break;
       case 37:
-# line 218 "AS.y"
+# line 227 "AS.y"
       { strcpy(operadorCond, "BGE"); } break;
       case 38:
-# line 219 "AS.y"
+# line 228 "AS.y"
       { strcpy(operadorCond, "BGT"); } break;
       case 39:
-# line 220 "AS.y"
+# line 229 "AS.y"
       { strcpy(operadorCond, "BLE"); } break;
       case 40:
-# line 221 "AS.y"
+# line 230 "AS.y"
       { strcpy(operadorCond, "BLT"); } break;
       case 41:
-# line 222 "AS.y"
+# line 231 "AS.y"
       { strcpy(operadorCond, "BNE"); } break;
       case 42:
-# line 223 "AS.y"
+# line 232 "AS.y"
       { strcpy(operadorCond, "BEQ"); } break;
       case 43:
-# line 226 "AS.y"
+# line 235 "AS.y"
       { strcpy(operadorLogico, "AND"); } break;
       case 44:
-# line 227 "AS.y"
+# line 236 "AS.y"
       { strcpy(operadorLogico, "OR"); } break;
       case 45:
-# line 231 "AS.y"
+# line 240 "AS.y"
       {
       						#ifdef MI_DEBUG
       							printf("\nComienzo Iteracion WHILE\n");
@@ -2028,7 +2064,7 @@ int yyparse()
       						pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;
       					} break;
       case 46:
-# line 237 "AS.y"
+# line 246 "AS.y"
       {
       																			#ifdef MI_DEBUG
       																				printf("\nFin Iteracion WHILE\n");
@@ -2048,7 +2084,7 @@ int yyparse()
       																			insertarValorEnPolaca(1, "BI");
       																		} break;
       case 47:
-# line 257 "AS.y"
+# line 266 "AS.y"
       {
       						#ifdef MI_DEBUG
       							printf("GET\n");
@@ -2056,7 +2092,7 @@ int yyparse()
       						insertarValorEnPolaca(1, "GET");
       					} break;
       case 48:
-# line 265 "AS.y"
+# line 274 "AS.y"
       {
       						#ifdef MI_DEBUG
       							printf("PUT\n");
@@ -2064,7 +2100,7 @@ int yyparse()
       						insertarValorEnPolaca(1, "PUT");
       					} break;
       case 49:
-# line 271 "AS.y"
+# line 280 "AS.y"
       {
       								#ifdef MI_DEBUG
       									printf("PUT\n");
@@ -2072,7 +2108,7 @@ int yyparse()
       								insertarValorEnPolaca(1, "PUT");
       							} break;
       case 50:
-# line 279 "AS.y"
+# line 288 "AS.y"
       {  tipo_dato = PR_STRING;
       					if(!esCONST)
       					{
@@ -2083,7 +2119,7 @@ int yyparse()
       					}
       				 } break;
       case 51:
-# line 288 "AS.y"
+# line 297 "AS.y"
       {   tipo_dato = PR_INT;
       						if(!esCONST)
       						{
@@ -2094,7 +2130,7 @@ int yyparse()
       						}
       					} break;
       case 52:
-# line 297 "AS.y"
+# line 306 "AS.y"
       {   tipo_dato = PR_REAL;
       								if(!esCONST)
       								{
@@ -2105,7 +2141,7 @@ int yyparse()
       								}
       				   } break;
       case 53:
-# line 308 "AS.y"
+# line 317 "AS.y"
       {
       											#ifdef MI_DEBUG
       												printf("+\n");
@@ -2115,7 +2151,7 @@ int yyparse()
       											insertarValorEnPolaca(1, "+");
       										} break;
       case 54:
-# line 316 "AS.y"
+# line 325 "AS.y"
       {
       												#ifdef MI_DEBUG
       													printf("-\n");
@@ -2125,43 +2161,88 @@ int yyparse()
       												insertarValorEnPolaca(1, "-");
       											} break;
       case 57:
-# line 328 "AS.y"
+# line 337 "AS.y"
       {
       											#ifdef MI_DEBUG
       												printf("*\n");
+      												printf("Primer op %s. Segundo op %s\n", TOS[yypvt[-2]].nombre, TOS[yypvt[-0]].nombre);
       											#endif
       											if(TOS[yypvt[-2]].tipo_dato == PR_STRING || TOS[yypvt[-0]].tipo_dato == PR_STRING)
       												yyerror("No es posible realizar una multiplicacion con un tipo de dato STRING");
       											insertarValorEnPolaca(1, "*");
       										} break;
       case 58:
-# line 336 "AS.y"
+# line 346 "AS.y"
       {
       											#ifdef MI_DEBUG
       												printf("/\n");
+      												printf("Primer op %s. Segundo op %s\n", TOS[yypvt[-2]].nombre, TOS[yypvt[-0]].nombre);
       											#endif
       											if(TOS[yypvt[-2]].tipo_dato == PR_STRING || TOS[yypvt[-0]].tipo_dato == PR_STRING)
       												yyerror("No es posible realizar una division con un tipo de dato STRING");
       											insertarValorEnPolaca(1, "/");
       										} break;
       case 60:
-# line 347 "AS.y"
+# line 358 "AS.y"
       {
       											yyval = yypvt[-1];
       										} break;
-      case 61:
-# line 350 "AS.y"
+      case 63:
+# line 365 "AS.y"
       {
       				#ifdef MI_DEBUG
       					printf("%s\n",buscarEnTOS(yypvt[-0]));
       				#endif
-      				insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
+      				if(!esCONST)
+      					insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
+      				yyval = yypvt[-0];
       			} break;
-      case 63:
-# line 359 "AS.y"
+      case 64:
+# line 375 "AS.y"
       { printf("\nQequal\n"); } break;
-      case 66:
-# line 364 "AS.y"
-      { printf("\nLET\n"); } break;    }
+      case 67:
+# line 380 "AS.y"
+      {
+      													esLETDEFAULT = 0;
+      													printf("\nLET\n");
+      													for(int i = 0; i < nroNodoPolacaIdLet; i++){
+      														//chequeo tipos para asignacion
+      														if(polacaIdLet[i].nodo.tipo_dato != polacaLetDefault[0].nodo.tipo_dato)
+      															yyerror("Tipo de dato incompatible en la asignacion del valor por default");
+      														// inserto ID que no tenia expresion
+      														polacaInversa[nroNodoPolaca] = polacaIdLet[i];
+      														nroNodoPolaca++;
+      														// inserto expresion por default
+      														for(int j = 0; j < nroNodoPolacaLetDefault; j++){
+      															polacaInversa[nroNodoPolaca] = polacaLetDefault[j];
+      															nroNodoPolaca++;
+      														}
+      														insertarValorEnPolaca(1, ":=");
+      													}
+      													nroNodoPolacaIdLet = 0;
+      													nroNodoPolacaLetDefault = 0;
+
+      												} break;
+      case 68:
+# line 403 "AS.y"
+      {
+      								esLETDEFAULT = 1;
+      							} break;
+      case 69:
+# line 409 "AS.y"
+      {
+      							insertarValorEnPolaca(1, ":=");
+      							printf("Tipo del ID: %d. Tipo de la exp: %d, Separador: %d", yypvt[-2] ,yypvt[-0], yypvt[-1]);
+      							if(TOS[yypvt[-2]].tipo_dato != TOS[yypvt[-0]].tipo_dato){
+      								yyerror("Tipos de dato incompatibles para la asignacion.");
+      							}
+      						} break;
+      case 70:
+# line 416 "AS.y"
+      {
+      									polacaIdLet[nroNodoPolacaIdLet].tipo = 0;
+      									polacaIdLet[nroNodoPolacaIdLet].nodo = TOS[yypvt[-0]];
+      									nroNodoPolacaIdLet++;
+      								} break;    }
     goto enstack;
 }
