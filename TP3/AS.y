@@ -281,6 +281,7 @@ salida: PR_PUT id 	{
 								#ifdef MI_DEBUG 
 									printf("PUT\n");
 								#endif    
+								insertarNodoEnPolaca(0, TOS[$2]);
 								insertarValorEnPolaca(1, "PUT");
 							}
 ;

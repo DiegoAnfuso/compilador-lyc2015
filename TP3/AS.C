@@ -68,7 +68,7 @@ int yyerror(char *s);
 YYSTYPE yylval, yyval;
 #define YYERRCODE 256
 
-# line 428 "AS.y"
+# line 429 "AS.y"
 
 
 /* -------------------------------------------------------------------------- */
@@ -2105,10 +2105,11 @@ int yyparse()
       								#ifdef MI_DEBUG
       									printf("PUT\n");
       								#endif
+      								insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
       								insertarValorEnPolaca(1, "PUT");
       							} break;
       case 50:
-# line 288 "AS.y"
+# line 289 "AS.y"
       {  tipo_dato = PR_STRING;
       					if(!esCONST)
       					{
@@ -2119,7 +2120,7 @@ int yyparse()
       					}
       				 } break;
       case 51:
-# line 297 "AS.y"
+# line 298 "AS.y"
       {   tipo_dato = PR_INT;
       						if(!esCONST)
       						{
@@ -2130,7 +2131,7 @@ int yyparse()
       						}
       					} break;
       case 52:
-# line 306 "AS.y"
+# line 307 "AS.y"
       {   tipo_dato = PR_REAL;
       								if(!esCONST)
       								{
@@ -2141,7 +2142,7 @@ int yyparse()
       								}
       				   } break;
       case 53:
-# line 317 "AS.y"
+# line 318 "AS.y"
       {
       											#ifdef MI_DEBUG
       												printf("+\n");
@@ -2151,7 +2152,7 @@ int yyparse()
       											insertarValorEnPolaca(1, "+");
       										} break;
       case 54:
-# line 325 "AS.y"
+# line 326 "AS.y"
       {
       												#ifdef MI_DEBUG
       													printf("-\n");
@@ -2161,7 +2162,7 @@ int yyparse()
       												insertarValorEnPolaca(1, "-");
       											} break;
       case 57:
-# line 337 "AS.y"
+# line 338 "AS.y"
       {
       											#ifdef MI_DEBUG
       												printf("*\n");
@@ -2172,7 +2173,7 @@ int yyparse()
       											insertarValorEnPolaca(1, "*");
       										} break;
       case 58:
-# line 346 "AS.y"
+# line 347 "AS.y"
       {
       											#ifdef MI_DEBUG
       												printf("/\n");
@@ -2183,12 +2184,12 @@ int yyparse()
       											insertarValorEnPolaca(1, "/");
       										} break;
       case 60:
-# line 358 "AS.y"
+# line 359 "AS.y"
       {
       											yyval = yypvt[-1];
       										} break;
       case 63:
-# line 365 "AS.y"
+# line 366 "AS.y"
       {
       				#ifdef MI_DEBUG
       					printf("%s\n",buscarEnTOS(yypvt[-0]));
@@ -2198,10 +2199,10 @@ int yyparse()
       				yyval = yypvt[-0];
       			} break;
       case 64:
-# line 375 "AS.y"
+# line 376 "AS.y"
       { printf("\nQequal\n"); } break;
       case 67:
-# line 380 "AS.y"
+# line 381 "AS.y"
       {
       													esLETDEFAULT = 0;
       													printf("\nLET\n");
@@ -2224,12 +2225,12 @@ int yyparse()
 
       												} break;
       case 68:
-# line 403 "AS.y"
+# line 404 "AS.y"
       {
       								esLETDEFAULT = 1;
       							} break;
       case 69:
-# line 409 "AS.y"
+# line 410 "AS.y"
       {
       							insertarValorEnPolaca(1, ":=");
       							printf("Tipo del ID: %d. Tipo de la exp: %d, Separador: %d", yypvt[-2] ,yypvt[-0], yypvt[-1]);
@@ -2238,7 +2239,7 @@ int yyparse()
       							}
       						} break;
       case 70:
-# line 416 "AS.y"
+# line 417 "AS.y"
       {
       									polacaIdLet[nroNodoPolacaIdLet].tipo = 0;
       									polacaIdLet[nroNodoPolacaIdLet].nodo = TOS[yypvt[-0]];
