@@ -1,5 +1,5 @@
 DECLARE
-  (a:REAL,b:REAL,c:REAL,d:REAL,e:REAL)
+  (a:INT,b:INT,c:INT,d:INT,e:INT)
 ENDDECLARE
 
 a:=1;

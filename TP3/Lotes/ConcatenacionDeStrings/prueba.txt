@@ -2,8 +2,8 @@ DECLARE
 	(s1:STRING, s2:STRING, s3:STRING)
 ENDDECLARE
 
-	--/ prueba de concatenaciÃ³n de cadenas /--
+	--/ prueba de concatenación de cadenas /--
 	s1:="prueba ";
 	s2:="exitosa";
-	s3:=s1++d2;
-	PUT string3;
+	s3:=s1++s2;
+	PUT s3;

@@ -1,5 +1,5 @@
 DECLARE
-	(k:INT, j:INT, cont:INT)
+	(k:INT, j:INT, cont:INT, id1:INT, i:INT)
 ENDDECLARE
 	PUT "IFs y WHILE";
 	id1:=1;

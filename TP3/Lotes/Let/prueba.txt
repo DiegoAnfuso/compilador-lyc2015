@@ -1,5 +1,5 @@
 DECLARE
-  (a:REAL,b:REAL,c:REAL,d:REAL,e:REAL)
+  (a:INT,b:INT,c:INT,d:INT,e:INT)
 ENDDECLARE
 
 a:=1;
@@ -8,7 +8,7 @@ c:=2;
 d:=2;
 e:=2;
 
-LET a:3+2,b:2*2,c,d:4/2,E:6-2 DEFAULT a+b;
+LET a:3+2,b:2*2,c,d:4/2,e:6-2 DEFAULT a+b;
 
 --/
 

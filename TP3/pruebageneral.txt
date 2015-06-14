@@ -1,5 +1,5 @@
 DECLARE
-	(a1:REAL, a2:REAL, a3:REAL, a4:INT, a5:INT, s1:STRING)
+	(a1:REAL, a2:REAL, a3:REAL, a4:INT, a5:INT, s1:STRING, s2:STRING)
 ENDDECLARE
 
 WHILE( a1>a2 )
@@ -18,8 +18,8 @@ a2 := .88;
 a3 := 77.;
 a2:=a1;
 
-a1 := "abc";
-a2 := s1;
+s1 := "abc";
+a2 := a1;
 a3 := s2++s1;
 
 CONST c1 := 99;
@@ -30,9 +30,9 @@ CONST c2 :="ejemplo constante";
 PUT "Condicion simple";
 GET s1;
 
-LET a1:3+2,a2:2*2,a3,a4:4/2,a5:6-2 DEFAULT a1+a2;
+LET a4:3+2,a5:2*2,a3,a1:4.3/2.111,a5:0 DEFAULT a1+a2;
 
-a1:=QEqual (a1+a2, [(a3-3)*2,3,3]);
+a4:=QEqual (a1+a2, [(a3-3)*2,3,3]);
 
 IF(a1>a2)
 THEN 
