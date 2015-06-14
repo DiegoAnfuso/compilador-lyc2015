@@ -27,11 +27,11 @@ int yyerror(char *s);
 /* ------------------------------- YACC TOKENS ------------------------------ */
 /* -------------------------------------------------------------------------- */
 %token PR_DECLARE PR_ENDDECLARE
-%token PR_INT PR_REAL PR_STRING PR_CONST 
+%token PR_INT PR_REAL PR_STRING PR_CONST
 %token PR_IF PR_ELSE PR_ENDIF PR_BEGIN PR_END PR_GET PR_PUT PR_WHILE PR_LET PR_QEQUAL PR_DEFAULT PR_THEN
 %token OP_ASIG OP_SUMA OP_RESTA OP_MULTIPLI OP_DIVISION OP_CONCAT
 %token PR_OR PR_AND OP_IGUAL OP_MENOR OP_MENORIGUAL OP_MAYOR OP_MAYORIGUAL PR_NOT
-%token ID 
+%token ID
 %token CTE_ENT
 %token CTE_REAL
 %token CTE_STRING
@@ -50,20 +50,20 @@ int yyerror(char *s);
 %left  OP_PCIERRA OP_CCIERRA OP_LLCIERRA
 
 %%
-programa_principal : programa 
+programa_principal : programa
 ;
 
 programa : PR_DECLARE { enDECLARE = 1;} OP_PABRE declaraciones { enDECLARE = 0;} OP_PCIERRA PR_ENDDECLARE   sentencias |
 		   sentencias
 ;
-		   
+
 declaraciones : declaracion |
 				declaraciones SEP_LISTA declaracion
 ;
 
-declaracion : ID SEP_DOSP tipo_variable 	{ 
-												#ifdef MI_DEBUG 
-													printf("\nDeclaracion de variable\n"); 
+declaracion : ID SEP_DOSP tipo_variable 	{
+												#ifdef MI_DEBUG
+													printf("\nDeclaracion de variable\n");
 												#endif
 												TOS[$1].tipo_dato = tipo_dato;
 											}
@@ -78,12 +78,12 @@ sentencias : sentencia |
 			sentencias sentencia
 ;
 
-sentencia : asignacion SEP_SENT 
+sentencia : asignacion SEP_SENT
 			| iteracion |
 			decision |
 			entrada SEP_SENT |
 			salida SEP_SENT |
-			inicio_const id OP_ASIG expresion SEP_SENT	{ 
+			inicio_const id OP_ASIG expresion SEP_SENT	{
 															esCONST = 0;
 															strcpy(TOS[$2].valor, TOS[$4].valor);
 															TOS[$2].tipo_dato = TOS[$4].tipo_dato;
@@ -91,28 +91,31 @@ sentencia : asignacion SEP_SENT
 			let SEP_SENT
 ;
 
-inicio_const: PR_CONST { esCONST = 1;} 
+inicio_const: PR_CONST { esCONST = 1;}
 ;
 
-asignacion : id OP_ASIG expresion 	{ 
-										#ifdef MI_DEBUG 
-											printf("\nAsignacion\n"); 
-											printf("%s\n",buscarEnTOS($1)); 
+asignacion : id OP_ASIG expresion 	{
+										#ifdef MI_DEBUG
+											printf("\nAsignacion\n");
+											printf("%s\n",buscarEnTOS($1));
 										#endif
 										if(strcmp(TOS[$1].tipo,"CONST") == 0)
 											yyerror("No se puede realizar una asignacion a una constante con nombre.");
 										if(TOS[$1].tipo_dato != TOS[$3].tipo_dato)
 											yyerror("Tipos de dato incompatibles para la asignacion.");
-										#ifdef MI_DEBUG 
+										#ifdef MI_DEBUG
 											printf(":=\n");
-										#endif  
+										#endif
 										insertarValorEnPolaca(1, ":=");
 									}|
-			 id OP_ASIG concatenacion |
+			 id OP_ASIG concatenacion	{
+											if(TOS[$1].tipo_dato != PR_STRING)
+												yyerror("Solo se puede asignar una concatenacion a una variable STRING.");
+										}|
 			 id OP_ASIG qequal {
-									#ifdef MI_DEBUG 
+									#ifdef MI_DEBUG
 										printf("\nQequal");
-									#endif  
+									#endif
 									if(TOS[$1].tipo_dato != PR_INT)
 										yyerror("Tipo de dato incompatible para la asignacion de QEqual");
 									// ASIGNO ID EN LOS LUGARES RESERVADOS DURANTE LA GENERACION DE LAS COMPARACIONES
@@ -123,8 +126,8 @@ asignacion : id OP_ASIG expresion 	{
 								}
 ;
 
-concatenacion : cadena OP_CONCAT cadena { 
-										#ifdef MI_DEBUG 
+concatenacion : cadena OP_CONCAT cadena {
+										#ifdef MI_DEBUG
 											printf("++\n");
 										#endif
 										if(TOS[$1].tipo_dato != PR_STRING || TOS[$3].tipo_dato != PR_STRING)
@@ -138,97 +141,99 @@ concatenacion : cadena OP_CONCAT cadena {
 cadena : ID | CTE_STRING
 ;
 
-decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN 	sentencias PR_ENDIF 	{ 
-																				#ifdef MI_DEBUG 
-																					printf("\nSentencia IF\n"); 
+decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN 	sentencias PR_ENDIF 	{
+																				#ifdef MI_DEBUG
+																					printf("\nSentencia IF\n");
 																				#endif
-																				int aux = pilaSaltos[--indexPilaSaltos]; 
+																				int aux = pilaSaltos[--indexPilaSaltos];
 																				asignarSalto(aux, nroNodoPolaca);
-																				if(esCondicionMultiple == 1){																					
-																					int aux2 = pilaSaltos[--indexPilaSaltos]; 																					
+																				if(esCondicionMultiple == 1){
+																					int aux2 = pilaSaltos[--indexPilaSaltos];
 																					if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
 																						asignarSalto(aux2, nroNodoPolaca);
 																					}
 																				}
-																				
+
 																			}
-		|   PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias 	{ 
-																		#ifdef MI_DEBUG 
+		|   PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias 	{
+																		#ifdef MI_DEBUG
 																			printf("\nFin del THEN\n");
 																		#endif
-																		int aux = pilaSaltos[--indexPilaSaltos]; 
-																		asignarSalto(aux, nroNodoPolaca+2);	
-																		if(esCondicionMultiple == 1){																					
-																			int aux2 = pilaSaltos[--indexPilaSaltos]; 
+																		int aux = pilaSaltos[--indexPilaSaltos];
+																		asignarSalto(aux, nroNodoPolaca+2);
+																		if(esCondicionMultiple == 1){
+																			int aux2 = pilaSaltos[--indexPilaSaltos];
 																			if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
 																				asignarSalto(aux2, nroNodoPolaca+2);
-																			}																			
+																			}
 																		}
-																		pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;	
-																		insertarValorEnPolaca(1, "");																									
-																		insertarValorEnPolaca(1, "BI");										
-																	} PR_ELSE sentencias PR_ENDIF	{ 
-																										#ifdef MI_DEBUG 
+																		pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;
+																		insertarValorEnPolaca(1, "");
+																		insertarValorEnPolaca(1, "BI");
+																	} PR_ELSE sentencias PR_ENDIF	{
+																										#ifdef MI_DEBUG
 																											printf("\nFin del ELSE\n");
-																										#endif																										
-																										int aux = pilaSaltos[--indexPilaSaltos]; 
-																										asignarSalto(aux, nroNodoPolaca);																																																				
-																									} 	
-;		   
+																										#endif
+																										int aux = pilaSaltos[--indexPilaSaltos];
+																										asignarSalto(aux, nroNodoPolaca);
+																									}
+;
 
-condicion : cond_simple { 
-							#ifdef MI_DEBUG 
-								printf("\nCondicion simple\n"); 
+condicion : cond_simple {
+							#ifdef MI_DEBUG
+								printf("\nCondicion simple\n");
 							#endif
 							esCondicionMultiple = 0;
 						}
 			| cond_multiple
 ;
 
-cond_simple : comparacion 	
+cond_simple : comparacion
 ;
 
 cond_multiple : comparacion op_logico	{
-											#ifdef MI_DEBUG 
-												printf("%s\n", operadorLogico); 
+											#ifdef MI_DEBUG
+												printf("%s\n", operadorLogico);
 											#endif
 											pilaOperadorLogico[indexPilaOperadorLogico++] = $2;
 											if($2 == PR_OR){
 												invertirOperadorCondicional();
 												posSaltoPrimeraCondicion = nroNodoPolaca-2;
-												#ifdef MI_DEBUG 
-													printf("%s\n", "Apilando salto para OR"); 
+												#ifdef MI_DEBUG
+													printf("%s\n", "Apilando salto para OR");
 												#endif
-											} 
+											}
 										}
-										
-										comparacion { 
-														#ifdef MI_DEBUG 
-															printf("%s\n", operadorLogico); 
+
+										comparacion {
+														#ifdef MI_DEBUG
+															printf("%s\n", operadorLogico);
 														#endif
 														if($2 == PR_OR){
 															asignarSalto(posSaltoPrimeraCondicion, nroNodoPolaca);
-															#ifdef MI_DEBUG 
-																printf("%s\n", "Asignando salto para OR"); 
+															#ifdef MI_DEBUG
+																printf("%s\n", "Asignando salto para OR");
 															#endif
 														}
-														esCondicionMultiple = 1;														
+														esCondicionMultiple = 1;
 													}
-			|	PR_NOT OP_PABRE comparacion OP_PCIERRA 	{ 
-															#ifdef MI_DEBUG 
-																printf("NOT\n"); 
+			|	PR_NOT OP_PABRE comparacion OP_PCIERRA 	{
+															#ifdef MI_DEBUG
+																printf("NOT\n");
 															#endif
 															invertirOperadorCondicional();
 															esCondicionMultiple = 0;
 														}
 ;
 
-comparacion : expresion comparador expresion 	{ 
+comparacion : expresion comparador expresion 	{
+													if(TOS[$1].tipo_dato != TOS[$3].tipo_dato)
+														yyerror("Tipos de dato incompatibles para realizar una comparacion.");
 													insertarValorEnPolaca(1, "CMP");
 													pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;
-													insertarValorEnPolaca(0, ""); 
+													insertarValorEnPolaca(0, "");
 													posicionOperadorComparacion = nroNodoPolaca;
-													insertarValorEnPolaca(1, operadorCond); 
+													insertarValorEnPolaca(1, operadorCond);
 												}
 ;
 
@@ -245,34 +250,34 @@ op_logico           : PR_AND { strcpy(operadorLogico, "AND"); }
                     ;
 
 
-iteracion: PR_WHILE { 
-						#ifdef MI_DEBUG 
-							printf("\nComienzo Iteracion WHILE\n"); 
+iteracion: PR_WHILE {
+						#ifdef MI_DEBUG
+							printf("\nComienzo Iteracion WHILE\n");
 						#endif
-						
-						pilaSaltos[indexPilaSaltos++] = nroNodoPolaca; 													
-					} OP_PABRE condicion OP_PCIERRA sentencias PR_END	{ 
-																			#ifdef MI_DEBUG 
-																				printf("\nFin Iteracion WHILE\n"); 
+
+						pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;
+					} OP_PABRE condicion OP_PCIERRA sentencias PR_END	{
+																			#ifdef MI_DEBUG
+																				printf("\nFin Iteracion WHILE\n");
 																			#endif
-																			int aux = pilaSaltos[--indexPilaSaltos]; 
+																			int aux = pilaSaltos[--indexPilaSaltos];
 																			asignarSalto(aux, nroNodoPolaca +2);
-																			if(esCondicionMultiple == 1){																					
-																				int aux2 = pilaSaltos[--indexPilaSaltos]; 
+																			if(esCondicionMultiple == 1){
+																				int aux2 = pilaSaltos[--indexPilaSaltos];
 																				if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
 																					asignarSalto(aux2, nroNodoPolaca + 2);
 																				}
-																			}																		
-																			
-																			aux = pilaSaltos[--indexPilaSaltos]; 
+																			}
+
+																			aux = pilaSaltos[--indexPilaSaltos];
 																			insertarValorEnPolaca(1, "");
 																			asignarSalto(nroNodoPolaca-1, aux);
-																			insertarValorEnPolaca(1, "BI");																			
+																			insertarValorEnPolaca(1, "BI");
 																		}
 ;
 
 entrada: PR_GET id  {
-						#ifdef MI_DEBUG 
+						#ifdef MI_DEBUG
 							printf("GET\n");
 						#endif
 						insertarValorEnPolaca(1, "GET");
@@ -280,78 +285,78 @@ entrada: PR_GET id  {
 ;
 
 salida: PR_PUT id 	{
-						#ifdef MI_DEBUG 
+						#ifdef MI_DEBUG
 							printf("PUT\n");
-						#endif    
+						#endif
 						insertarValorEnPolaca(1, "PUT");
 					}
 		| PR_PUT CTE_STRING {
-								#ifdef MI_DEBUG 
+								#ifdef MI_DEBUG
 									printf("PUT\n");
-								#endif    
+								#endif
 								insertarNodoEnPolaca(0, TOS[$2]);
 								insertarValorEnPolaca(1, "PUT");
 							}
 ;
 
-cte : CTE_STRING {  tipo_dato = PR_STRING; 
+cte : CTE_STRING {  tipo_dato = PR_STRING;
 					if(!esCONST)
 					{
-						#ifdef MI_DEBUG 
-							printf("%s\n",buscarEnTOS($1)); 
+						#ifdef MI_DEBUG
+							printf("%s\n",buscarEnTOS($1));
 						#endif
 						insertarNodoEnPolaca(0, TOS[$1]);
 					}
-				 } 
-				 | CTE_ENT  	{   tipo_dato = PR_INT;  
+				 }
+				 | CTE_ENT  	{   tipo_dato = PR_INT;
 						if(!esCONST)
 						{
-							#ifdef MI_DEBUG 
-								printf("%s\n",buscarEnTOS($1)); 
+							#ifdef MI_DEBUG
+								printf("%s\n",buscarEnTOS($1));
 							#endif
 							insertarNodoEnPolaca(0, TOS[$1]);
 						}
 					}
-				| CTE_REAL 	{   tipo_dato = PR_REAL; 
+				| CTE_REAL 	{   tipo_dato = PR_REAL;
 								if(!esCONST)
 								{
-									#ifdef MI_DEBUG 
-										printf("%s\n",buscarEnTOS($1)); 
+									#ifdef MI_DEBUG
+										printf("%s\n",buscarEnTOS($1));
 									#endif
 									insertarNodoEnPolaca(0, TOS[$1]);
 								}
 				   }
 ;
 
-expresion : expresion OP_SUMA termino 	{ 
-											#ifdef MI_DEBUG 
+expresion : expresion OP_SUMA termino 	{
+											#ifdef MI_DEBUG
 												printf("+\n");
 											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una suma con un tipo de dato STRING");
-											insertarValorEnPolaca(1, "+"); 					
-										} 
-			| expresion OP_RESTA termino 	{ 
-												#ifdef MI_DEBUG 
-													printf("-\n"); 
+											insertarValorEnPolaca(1, "+");
+										}
+			| expresion OP_RESTA termino 	{
+												#ifdef MI_DEBUG
+													printf("-\n");
 												#endif
 												if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 													yyerror("No es posible realizar una resta con un tipo de dato STRING");
 												insertarValorEnPolaca(1, "-");
 											}
-			| termino 
+			| termino
 ;
 
-termino : termino OP_MULTIPLI factor 	{ 
-											#ifdef MI_DEBUG 
+termino : termino OP_MULTIPLI factor 	{
+											#ifdef MI_DEBUG
 												printf("*\n");
-											#endif														
+											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una multiplicacion con un tipo de dato STRING");
 											insertarValorEnPolaca(1, "*");
 										}
-		| termino OP_DIVISION factor 	{ 
-											#ifdef MI_DEBUG 
+		| termino OP_DIVISION factor 	{
+											#ifdef MI_DEBUG
 												printf("/\n");
 											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
@@ -361,15 +366,15 @@ termino : termino OP_MULTIPLI factor 	{
 		| factor
 ;
 
-factor : OP_PABRE expresion OP_PCIERRA 	{ 
-											$$ = $2; 
+factor : OP_PABRE expresion OP_PCIERRA 	{
+											$$ = $2;
 										}
-		|id 
+		|id
 		|cte
 ;
 
-id : ID {  
-				#ifdef MI_DEBUG 
+id : ID {
+				#ifdef MI_DEBUG
 					printf("%s\n",buscarEnTOS($1));
 				#endif
 				if(!esCONST)
@@ -378,45 +383,45 @@ id : ID {
 			}
 ;
 
-qequal : PR_QEQUAL OP_PABRE {								
+qequal : PR_QEQUAL OP_PABRE {
 								// INICIALIZA EL ID EN 0
 								insertarValorEnPolaca(0, "0");
-								insertarValorEnPolaca(1, ":=");	
+								insertarValorEnPolaca(1, ":=");
 								esPIVOT = 1;
-							} expresion {	
+							} expresion {
 											esPIVOT = 0;
-											insertarExpresionPivotQequal();										
-										} SEP_LISTA OP_CABRE lista_expresiones OP_CCIERRA OP_PCIERRA 
+											insertarExpresionPivotQequal();
+										} SEP_LISTA OP_CABRE lista_expresiones OP_CCIERRA OP_PCIERRA
 ;
 lista_expresiones : expresion	{
 									insertarComparacionQequal();
-								}| lista_expresiones SEP_LISTA 	{																		
+								}| lista_expresiones SEP_LISTA 	{
 																	insertarExpresionPivotQequal();
 																} expresion {
-																				insertarComparacionQequal();	
+																				insertarComparacionQequal();
 																			}
 ;
 
-let : PR_LET lista_let let_default expresion 	{ 
+let : PR_LET lista_let let_default expresion 	{
 													esLETDEFAULT = 0;
-													printf("\nLET\n"); 
+													printf("\nLET\n");
 													for(int i = 0; i < nroNodoPolacaIdLet; i++){
 														//chequeo tipos para asignacion
 														if(polacaIdLet[i].nodo.tipo_dato != polacaLetDefault[0].nodo.tipo_dato)
 															yyerror("Tipo de dato incompatible en la asignacion del valor por default");
 														// inserto ID que no tenia expresion
-														polacaInversa[nroNodoPolaca] = polacaIdLet[i];														
-														nroNodoPolaca++;															
+														polacaInversa[nroNodoPolaca] = polacaIdLet[i];
+														nroNodoPolaca++;
 														// inserto expresion por default
 														for(int j = 0; j < nroNodoPolacaLetDefault; j++){
 															polacaInversa[nroNodoPolaca] = polacaLetDefault[j];
 															nroNodoPolaca++;
-														}														
-														insertarValorEnPolaca(1, ":=");		
+														}
+														insertarValorEnPolaca(1, ":=");
 													}
 													nroNodoPolacaIdLet = 0;
 													nroNodoPolacaLetDefault = 0;
-													
+
 												}
 ;
 
@@ -424,27 +429,27 @@ let_default : PR_DEFAULT 	{
 								esLETDEFAULT = 1;
 							}
 ;
-						
+
 
 asig_let : id  SEP_DOSP expresion	{
-							insertarValorEnPolaca(1, ":=");		
+							insertarValorEnPolaca(1, ":=");
 							if(TOS[$1].tipo_dato != TOS[$3].tipo_dato){
 								yyerror("Tipos de dato incompatibles para la asignacion.");
 							}
-						}	
-						| ID 	{		
+						}
+						| ID 	{
 									polacaIdLet[nroNodoPolacaIdLet].tipo = 0;
 									polacaIdLet[nroNodoPolacaIdLet].nodo = TOS[$1];
 									nroNodoPolacaIdLet++;
 								}
-								
-							
+
+
 ;
 lista_let : asig_let | lista_let SEP_LISTA asig_let
 ;
 
 
-%% 
+%%
 
 /* -------------------------------------------------------------------------- */
 /*                             VARIABLES GLOBALES                             */
@@ -1042,7 +1047,7 @@ void Inf_SepDosP()
 int tipo_dato;
 int tipo_const;
 
-typedef struct 
+typedef struct
 {
     char nombre[TAMTOKEN];
     int  token;
@@ -1431,7 +1436,7 @@ int insertarTOS(int NroToken, const char * lexema)
 			if (strcmp(TOS[i].valor,auxStr)==0)
 				return i;
 		}
-    } else {	
+    } else {
 		for (i=CANTPR; i<TOStop;  i++)
 		{
 			if (strcmp(TOS[i].nombre,lexema)==0){
@@ -1449,7 +1454,7 @@ int insertarTOS(int NroToken, const char * lexema)
             if (!enDECLARE && !esCONST) {
                 yyerror("Variable no declarada.");
             }
-            
+
             if (!esCONST)
                 strcpy(TOS[TOStop].tipo,"ID" );
             else
@@ -1458,7 +1463,7 @@ int insertarTOS(int NroToken, const char * lexema)
             TOS[TOStop].tipo_dato = tipo_dato;
 			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
-            break;        
+            break;
         case CTE_ENT:
             strcpy(TOS[TOStop].tipo,"CTE_ENT");
             TOS[TOStop].tipo_dato = PR_INT;
@@ -1480,7 +1485,7 @@ int insertarTOS(int NroToken, const char * lexema)
             break;
     }
 
-    
+
     TOStop++;
 
     return TOStop-1;
@@ -1724,7 +1729,7 @@ FILE * archPolaca;
 char operadorCond[5];
 char operadorLogico[5];
 
-typedef struct 
+typedef struct
 {
     int    tipo;
     nodoTS nodo;
@@ -1737,7 +1742,7 @@ int indexPilaSaltos = 0;
 int posicionOperadorComparacion;
 int esCondicionMultiple = 0;
 int posSaltoPrimeraCondicion = 0;
-int pilaOperadorLogico[100]; 
+int pilaOperadorLogico[100];
 int indexPilaOperadorLogico = 0;
 
 nodoPolaca polacaLetDefault[TAMMAX];
@@ -1748,7 +1753,7 @@ int nroNodoPolacaIdLet = 0;
 
 nodoPolaca polacaPivot[TAMMAX];
 int nroNodoPolacaPivot = 0;
-int pilaPosIdQequal[100]; 
+int pilaPosIdQequal[100];
 int indexPilaPosIdQequal = 0;
 
 void imprimirPolacaInversa();
@@ -1781,43 +1786,43 @@ void imprimirPolacaInversa()
         printf("No se puede CERRAR el archivo de polaca");
         getch();
         exit(1);
-    }    
+    }
 }
 
 void insertarNodoEnPolaca(int tipo, const nodoTS nodo)
 {
 	if(esLETDEFAULT){
-		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo; 
+		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo;
 		polacaLetDefault[nroNodoPolacaLetDefault].nodo = nodo;
 		nroNodoPolacaLetDefault++;
 	} if(esPIVOT){
-		polacaPivot[nroNodoPolacaPivot].tipo = tipo; 
+		polacaPivot[nroNodoPolacaPivot].tipo = tipo;
 		polacaPivot[nroNodoPolacaPivot].nodo = nodo;
 		nroNodoPolacaPivot++;
 	} else {
-		polacaInversa[nroNodoPolaca].tipo = tipo; 
+		polacaInversa[nroNodoPolaca].tipo = tipo;
 		polacaInversa[nroNodoPolaca].nodo = nodo;
 		nroNodoPolaca++;
 	}
-    
+
 }
 
 void insertarValorEnPolaca(int tipo, const char * valor)
 {
 	if(esLETDEFAULT){
-		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo; 
+		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo;
 		strcpy(polacaLetDefault[nroNodoPolacaLetDefault].nodo.valor, valor);
-		nroNodoPolacaLetDefault++; 
+		nroNodoPolacaLetDefault++;
 	} if(esPIVOT){
-		polacaPivot[nroNodoPolacaPivot].tipo = tipo; 
+		polacaPivot[nroNodoPolacaPivot].tipo = tipo;
 		strcpy(polacaPivot[nroNodoPolacaPivot].nodo.valor, valor);
 		nroNodoPolacaPivot++;
 	} else {
-		polacaInversa[nroNodoPolaca].tipo = tipo; 
+		polacaInversa[nroNodoPolaca].tipo = tipo;
 		strcpy(polacaInversa[nroNodoPolaca].nodo.valor, valor);
-		nroNodoPolaca++; 
+		nroNodoPolaca++;
 	}
-    
+
 }
 
 void asignarSalto(int posicion, int salto)
@@ -1841,29 +1846,29 @@ void invertirOperadorCondicional()
         strcpy(res, "BGE");
     else
         strcpy(res, "BEQ");
-    
+
     strcpy(polacaInversa[posicionOperadorComparacion].nodo.valor, res);
 }
 
 void insertarExpresionPivotQequal(){
 	for(int i = 0; i < nroNodoPolacaPivot; i++){
-		polacaInversa[nroNodoPolaca] = polacaPivot[i];														
-		nroNodoPolaca++;	
-	}	
+		polacaInversa[nroNodoPolaca] = polacaPivot[i];
+		nroNodoPolaca++;
+	}
 }
 
 void insertarComparacionQequal(){
 	insertarValorEnPolaca(1, "CMP");
 	asignarSalto(nroNodoPolaca, nroNodoPolaca+7); // BNE,id,id,1,+,:=,___
-	nroNodoPolaca++;	
+	nroNodoPolaca++;
 	insertarValorEnPolaca(1, "BNE");
 	pilaPosIdQequal[indexPilaPosIdQequal++] = nroNodoPolaca;
-	insertarValorEnPolaca(1, " ");		
+	insertarValorEnPolaca(1, " ");
 	pilaPosIdQequal[indexPilaPosIdQequal++] = nroNodoPolaca;
-	insertarValorEnPolaca(1, " ");	
-	insertarValorEnPolaca(0, "1");													
-	insertarValorEnPolaca(1, "+");		
-	insertarValorEnPolaca(1, ":=");		
+	insertarValorEnPolaca(1, " ");
+	insertarValorEnPolaca(0, "1");
+	insertarValorEnPolaca(1, "+");
+	insertarValorEnPolaca(1, ":=");
 }
 
 
@@ -1917,5 +1922,5 @@ void warning(char *s, char *t){
 int yyerror(char *s){
 	warning(s, (char *) 0);
 	mostrarTOS();
-	exit(1);    
+	exit(1);
 }

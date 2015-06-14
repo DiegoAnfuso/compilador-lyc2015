@@ -20,7 +20,7 @@ a2:=a1;
 
 s1 := "abc";
 a2 := a1;
-a3 := s2++s1;
+s2 := s2++s1;
 
 CONST c1 := 99;
 CONST c2 :="ejemplo constante";

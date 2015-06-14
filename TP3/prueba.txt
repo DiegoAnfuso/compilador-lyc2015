@@ -7,12 +7,12 @@ LET f: 2, k, b: 3.2, j, o:20 DEFAULT (5+2)*1;
 PUT d;
 b := a + 1;
 o:= QEqual(8+f*j, [j+4,20,f*(f-j)]);
-WHILE(a*7+b < b+c*4 OR b < 0) 
+WHILE(a*7+b < b+c*4 OR b < 2.3) 
 	a := a + 1;
 	a := 0.0;
-	IF(a-8 < f*8+4 AND j*7 >= 88/2)
+	IF(j-8 < f*8+4 AND j*7 >= 88/2)
 	THEN
-		IF(c-8 < c+4 OR p*8 >= 2)
+		IF(c-8 < c+4 OR p*8 >= 2.5)
 		THEN
 			c := 1.2 + 1.5;
 		ELSE

@@ -1,2 +1,2 @@
-- Comprobar tipo en comparaciones. Solo dejar si tipo_dato es igual.
-- Comprobar que el id al cual se asigna una concatenacion sea STRING.
+* Comprobar tipo en comparaciones. Solo dejar si tipo_dato es igual.
+* Comprobar que el id al cual se asigna una concatenacion sea STRING.

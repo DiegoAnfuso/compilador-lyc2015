@@ -22,29 +22,31 @@ Nro	 | Nombre			 | Tipo	 | Valor	 | Longitud	 | Tipo_Dato
 18     	 | NOT     			 | PR     	 |  	 | 0 	 | 0 
 19     	 | DEFAULT     			 | PR     	 |  	 | 0 	 | 0 
 20     	 | THEN     			 | PR     	 |  	 | 0 	 | 0 
-21     	 | a     			 | ID     	 | a 	 | 0 	 | 260 
-22     	 | b     			 | ID     	 | b 	 | 0 	 | 260 
-23     	 | c     			 | ID     	 | c 	 | 0 	 | 260 
-24     	 | f     			 | ID     	 | f 	 | 0 	 | 259 
-25     	 | j     			 | ID     	 | j 	 | 0 	 | 259 
-26     	 | o     			 | ID     	 | o 	 | 0 	 | 259 
-27     	 | k     			 | ID     	 | k 	 | 0 	 | 259 
-28     	 | d     			 | ID     	 | d 	 | 0 	 | 260 
-29     	 | p     			 | CONST     	 | 2.0 	 | 0 	 | 260 
-30     	 | 2.0     			 | CTE_REAL     	 | 2.0 	 | 0 	 | 260 
-31     	 | t     			 | CONST     	 | 20 	 | 0 	 | 259 
-32     	 | 20     			 | CTE_ENT     	 | 20 	 | 0 	 | 259 
-33     	 | 2     			 | CTE_ENT     	 | 2 	 | 0 	 | 259 
-34     	 | 3.2     			 | CTE_REAL     	 | 3.2 	 | 0 	 | 260 
-35     	 | 5     			 | CTE_ENT     	 | 5 	 | 0 	 | 259 
-36     	 | 1     			 | CTE_ENT     	 | 1 	 | 0 	 | 259 
-37     	 | 8     			 | CTE_ENT     	 | 8 	 | 0 	 | 259 
-38     	 | 4     			 | CTE_ENT     	 | 4 	 | 0 	 | 259 
-39     	 | 7     			 | CTE_ENT     	 | 7 	 | 0 	 | 259 
-40     	 | 0     			 | CTE_ENT     	 | 0 	 | 0 	 | 259 
-41     	 | 0.0     			 | CTE_REAL     	 | 0.0 	 | 0 	 | 260 
-42     	 | 88     			 | CTE_ENT     	 | 88 	 | 0 	 | 259 
-43     	 | 1.2     			 | CTE_REAL     	 | 1.2 	 | 0 	 | 260 
-44     	 | 1.5     			 | CTE_REAL     	 | 1.5 	 | 0 	 | 260 
+21     	 | a1     			 | ID     	 | a1 	 | 0 	 | 260 
+22     	 | a2     			 | ID     	 | a2 	 | 0 	 | 260 
+23     	 | a3     			 | ID     	 | a3 	 | 0 	 | 260 
+24     	 | a4     			 | ID     	 | a4 	 | 0 	 | 259 
+25     	 | a5     			 | ID     	 | a5 	 | 0 	 | 259 
+26     	 | s1     			 | ID     	 | s1 	 | 0 	 | 261 
+27     	 | s2     			 | ID     	 | s2 	 | 0 	 | 261 
+28     	 | 13.13     			 | CTE_REAL     	 | 13.13 	 | 0 	 | 260 
+29     	 | 1     			 | CTE_ENT     	 | 1 	 | 0 	 | 259 
+30     	 | 99.99     			 | CTE_REAL     	 | 99.99 	 | 0 	 | 260 
+31     	 | .88     			 | CTE_REAL     	 | .88 	 | 0 	 | 260 
+32     	 | 77.     			 | CTE_REAL     	 | 77. 	 | 0 	 | 260 
+33     	 | "abc"     			 | CTE_STRING     	 | abc 	 | 3 	 | 261 
+34     	 | c1     			 | CONST     	 | 99 	 | 0 	 | 259 
+35     	 | 99     			 | CTE_ENT     	 | 99 	 | 0 	 | 259 
+36     	 | c2     			 | CONST     	 | ejemplo constante 	 | 0 	 | 261 
+37     	 | "ejemplo constante"     			 | CTE_STRING     	 | ejemplo constante 	 | 17 	 | 261 
+38     	 | "Condicion simple"     			 | CTE_STRING     	 | Condicion simple 	 | 16 	 | 261 
+39     	 | 3     			 | CTE_ENT     	 | 3 	 | 0 	 | 259 
+40     	 | 2     			 | CTE_ENT     	 | 2 	 | 0 	 | 259 
+41     	 | 4.3     			 | CTE_REAL     	 | 4.3 	 | 0 	 | 260 
+42     	 | 2.111     			 | CTE_REAL     	 | 2.111 	 | 0 	 | 260 
+43     	 | 0     			 | CTE_ENT     	 | 0 	 | 0 	 | 259 
+44     	 | "4"     			 | CTE_STRING     	 | 4 	 | 1 	 | 261 
+45     	 | "5"     			 | CTE_STRING     	 | 5 	 | 1 	 | 261 
+46     	 | "8"     			 | CTE_STRING     	 | 8 	 | 1 	 | 261 
 
 ------------------------------ TABLA DE  SIMBOLOS ------------------------------
