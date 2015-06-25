@@ -1055,6 +1055,10 @@ void Inf_SepDosP()
 int tipo_dato;
 int tipo_const;
 
+int cont_const_int = 0;
+int cont_const_real = 0;
+int cont_const_string = 0;
+
 typedef struct
 {
     char nombre[TAMTOKEN];
@@ -1444,15 +1448,22 @@ int insertarTOS(int NroToken, const char * lexema)
 			if (strcmp(TOS[i].valor,auxStr)==0)
 				return i;
 		}
-    } else {
+    } else if (NroToken==ID) {
 		for (i=CANTPR; i<TOStop;  i++)
 		{
 			if (strcmp(TOS[i].nombre,lexema)==0){
-				if ((esCONST || enDECLARE) && NroToken == ID) {
+				if (esCONST || enDECLARE) {
 					yyerror("Variable declarada previamente.");
 				} else {
 					return i;
 				}
+			}
+		}
+	} else {
+		for (i=CANTPR; i<TOStop;  i++)
+		{
+			if (strcmp(TOS[i].valor,lexema)==0){
+				return i;
 			}
 		}
 	}
@@ -1472,23 +1483,23 @@ int insertarTOS(int NroToken, const char * lexema)
 			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
-        case CTE_ENT:
+        case CTE_ENT:			
             strcpy(TOS[TOStop].tipo,"CTE_ENT");
             TOS[TOStop].tipo_dato = PR_INT;
-			strcpy(TOS[TOStop].nombre, lexema);
+			sprintf(TOS[TOStop].nombre,"_CTE_ENT_%d",++cont_const_int);			
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_REAL:
             strcpy(TOS[TOStop].tipo,"CTE_REAL");
             TOS[TOStop].tipo_dato = PR_REAL;
-			strcpy(TOS[TOStop].nombre, lexema);
+			sprintf(TOS[TOStop].nombre,"_CTE_REAL_%d",++cont_const_real);			
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_STRING:
-            strcpy(TOS[TOStop].tipo,"CTE_STRING" );
+            strcpy(TOS[TOStop].tipo,"CTE_STRING");
             TOS[TOStop].tipo_dato = PR_STRING;
             TOS[TOStop].longitud = (strlen(auxStr));
-			strcpy(TOS[TOStop].nombre, lexema);
+			sprintf(TOS[TOStop].nombre,"_CTE_STRING_%d",++cont_const_string);			
 			strcpy(TOS[TOStop].valor, auxStr);
             break;
     }
