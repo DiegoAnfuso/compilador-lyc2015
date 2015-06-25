@@ -1,8 +1,9 @@
 DECLARE
 	(a:REAL, b:REAL, c:REAL, f:INT, j:INT, o:INT, k:INT, d:REAL)
 ENDDECLARE
-CONST p := 2.0;
-CONST t := 20;
+CONST REAL p := 2.0;
+CONST INT t := 20;
+CONST STRING u := "esto es una cadena de prueba";
 LET f: 2, k, b: 3.2, j, o:20 DEFAULT (5+2)*1;
 PUT d;
 b := a + 1;

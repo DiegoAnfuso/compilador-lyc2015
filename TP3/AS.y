@@ -83,10 +83,15 @@ sentencia : asignacion SEP_SENT
 			decision |
 			entrada SEP_SENT |
 			salida SEP_SENT |
-			inicio_const id OP_ASIG expresion SEP_SENT	{
+			inicio_const tipo_variable id OP_ASIG expresion SEP_SENT	{
 															esCONST = 0;
-															strcpy(TOS[$2].valor, TOS[$4].valor);
-															TOS[$2].tipo_dato = TOS[$4].tipo_dato;
+															if(TOS[$5].tipo_dato != $2){
+																yyerror("Tipos incompatibles en la declaracion de la constante.");
+															}
+															strcpy(TOS[$3].valor, TOS[$5].valor);
+															TOS[$3].longitud =  TOS[$5].longitud;
+															TOS[$3].tipo_dato = $2;
+															
 														}  |
 			let SEP_SENT
 ;
@@ -1501,18 +1506,14 @@ void mostrarTOS()
     }
     int i;
 
-    //printf("\n------------------------------ TABLA DE  SIMBOLOS ------------------------------\n");
-    fprintf(tos,"\n------------------------------ TABLA DE  SIMBOLOS ------------------------------\n");
+    fprintf(tos,"\n------------------------------------------------- TABLA DE  SIMBOLOS -------------------------------------------------\n");
 
-    //printf ("Nro\t | Nombre\t\t\t | Tipo\t | Valor\n");
-    fprintf(tos,"Nro\t | Nombre\t\t\t | Tipo\t | Valor\t | Longitud\t | Tipo_Dato \n");
+    fprintf(tos,"Nro  | Nombre\t\t\t\t\t\t\t  | Tipo\t\t   | Valor\t\t\t\t\t\t\t    | Longitud | Tipo_Dato \n");
     for (i=0; i<TOStop; i++)
     {
-      //  printf ("%d     \t | %s     \t\t\t | %s     \t | %s \n",i,TOS[i].nombre, TOS[i].tipo, TOS[i].valor);
-        fprintf(tos,"%d     \t | %s     \t\t\t | %s     \t | %s \t | %d \t | %d \n",i,TOS[i].nombre, TOS[i].tipo, TOS[i].valor, TOS[i].longitud, TOS[i].tipo_dato);
+		fprintf(tos,"%-4d | %-34s | %-14s | %-34s | %-8d | %d \n",i,TOS[i].nombre, TOS[i].tipo, TOS[i].valor, TOS[i].longitud, TOS[i].tipo_dato);
     }
-    //printf("\n--------------------------------------------------------------------------------\n");
-    fprintf(tos,"\n------------------------------ TABLA DE  SIMBOLOS ------------------------------\n");
+    fprintf(tos,"\n------------------------------------------------- TABLA DE  SIMBOLOS -------------------------------------------------\n");
 }
 
 /* -------------------------------------------------------------------------- */
