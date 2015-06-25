@@ -50,7 +50,7 @@ int yyerror(char *s);
 %left  OP_PCIERRA OP_CCIERRA OP_LLCIERRA
 
 %%
-programa_principal : programa
+programa_principal : programa { imprimirASM(); }
 ;
 
 programa : PR_DECLARE { enDECLARE = 1;} OP_PABRE declaraciones { enDECLARE = 0;} OP_PCIERRA PR_ENDDECLARE   sentencias |
@@ -499,6 +499,9 @@ int TOStop = 0;		  // ?ndice de la TOS
 /* -------------------------------------------------------------------------- */
 /*                           DECLARACION PROTOTIPOS                           */
 /* -------------------------------------------------------------------------- */
+
+//FUNCIONES ASSEMBLER
+void imprimirASM();
 
 // FUNCIONES GENERALES
 void abrirCodigoFuente();
@@ -1870,6 +1873,41 @@ void insertarComparacionQequal(){
 	insertarValorEnPolaca(0, "1");
 	insertarValorEnPolaca(1, "+");
 	insertarValorEnPolaca(1, ":=");
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 ASSEMBLER                                  */
+/* -------------------------------------------------------------------------- */
+
+#define ARCH_ASM "Final.asm"
+
+FILE * archAssembler;
+
+void imprimirASM()
+{
+    if ((archAssembler = fopen (ARCH_ASM, "w"))== NULL)
+    {
+        printf("No se puede generar el archivo de Assembler");
+        getch();
+        exit(1);
+    }
+
+    int i;
+
+    //Imprimir cabecera del archivo Assembler
+    fprintf(archAssembler, "include macros2.asm\t\t ;incluye macros\n");
+    fprintf(archAssembler, "include number.asm\t\t ;incluye el asm para impresion de numeros\n");
+    fprintf(archAssembler, ".MODEL LARGE ; tipo del modelo de memoria usado.\n");
+    fprintf(archAssembler, ".386\n");
+    fprintf(archAssembler, ".STACK 200h ; bytes en el stack\n");
+    fflush(archAssembler);
+
+    if(fclose(archAssembler)!=0)
+    {
+        printf("No se puede CERRAR el archivo de Assembler");
+        getch();
+        exit(1);
+    }
 }
 
 

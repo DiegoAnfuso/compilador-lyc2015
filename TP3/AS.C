@@ -117,6 +117,9 @@ int TOStop = 0;		  // ?ndice de la TOS
 /*                           DECLARACION PROTOTIPOS                           */
 /* -------------------------------------------------------------------------- */
 
+//FUNCIONES ASSEMBLER
+void imprimirASM();
+
 // FUNCIONES GENERALES
 void abrirCodigoFuente();
 void cerrarCodigoFuente();
@@ -1493,6 +1496,41 @@ void insertarComparacionQequal(){
 	insertarValorEnPolaca(1, ":=");
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                 ASSEMBLER                                  */
+/* -------------------------------------------------------------------------- */
+
+#define ARCH_ASM "Final.asm"
+
+FILE * archAssembler;
+
+void imprimirASM()
+{
+    if ((archAssembler = fopen (ARCH_ASM, "w"))== NULL)
+    {
+        printf("No se puede generar el archivo de Assembler");
+        getch();
+        exit(1);
+    }
+
+    int i;
+
+    //Imprimir cabecera del archivo Assembler
+    fprintf(archAssembler, "include macros2.asm\t\t ;incluye macros\n");
+    fprintf(archAssembler, "include number.asm\t\t ;incluye el asm para impresion de numeros\n");
+    fprintf(archAssembler, ".MODEL LARGE ; tipo del modelo de memoria usado.\n");
+    fprintf(archAssembler, ".386\n");
+    fprintf(archAssembler, ".STACK 200h ; bytes en el stack\n");
+    fflush(archAssembler);
+
+    if(fclose(archAssembler)!=0)
+    {
+        printf("No se puede CERRAR el archivo de Assembler");
+        getch();
+        exit(1);
+    }
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*                                      MAIN                                  */
@@ -1896,6 +1934,9 @@ int yyparse()
     if (j>=YYLAST || yychk[ tmpstate = yyact[j] ] != -n) tmpstate = yyact[yypgo[n]];
     switch (m) { /* actions associated with grammar rules */
 
+      case 1:
+# line 53 "AS.y"
+      { imprimirASM(); } break;
       case 2:
 # line 56 "AS.y"
       { enDECLARE = 1;} break;
