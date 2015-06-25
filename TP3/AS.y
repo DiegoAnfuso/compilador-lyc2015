@@ -1727,8 +1727,10 @@ int yylex() //FUNCION  QUE LEE HASTA FINAL DE TOKEN O EOF
 /* -------------------------------------------------------------------------- */
 
 #define ARCH_POLACA "polaca.txt"
+#define ARCH_POLACA_NUMERADA "polaca_numerada.txt"
 
 FILE * archPolaca;
+FILE * archPolacaNumerada;
 
 char operadorCond[5];
 char operadorLogico[5];
@@ -1777,17 +1779,33 @@ void imprimirPolacaInversa()
         getch();
         exit(1);
     }
+	
+	if ((archPolacaNumerada = fopen (ARCH_POLACA_NUMERADA, "w"))== NULL)
+    {
+        printf("No se puede generar el archivo de polaca numerada");
+        getch();
+        exit(1);
+    }
 
     int i;
 
     for (i=0; i<nroNodoPolaca; i++)
-    {
-        fprintf(archPolaca, "%d - %s\n", i, polacaInversa[i].nodo.valor);
+    {		
+        fprintf(archPolaca, "%s", polacaInversa[i].nodo.valor);
+		if(i<nroNodoPolaca-1)
+			 fprintf(archPolaca, ",");
+		fprintf(archPolacaNumerada, "%d - %s\n", i, polacaInversa[i].nodo.valor);
     }
 
     if(fclose(archPolaca)!=0)
     {
         printf("No se puede CERRAR el archivo de polaca");
+        getch();
+        exit(1);
+    }
+	if(fclose(archPolacaNumerada)!=0)
+    {
+        printf("No se puede CERRAR el archivo de polaca numerada");
         getch();
         exit(1);
     }
