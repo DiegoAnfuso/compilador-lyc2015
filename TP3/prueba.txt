@@ -49,7 +49,7 @@ WHILE(i<=5)
 				d:=a*b/c*(0.50+c);
 			END	
 		ELSE
-			IF ( i==j AND (i*j)<10 )
+			IF ( i==j AND (i*j)>10 )
 			THEN
 				PUT "se cumplen 2da condicion !";
 				x:=QEqual(i,[(1+(1-1)),(2-(5-5*(5/5))*j*0),3,4,5,j]);

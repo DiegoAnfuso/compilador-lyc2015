@@ -91,7 +91,7 @@ sentencia : asignacion SEP_SENT
 															strcpy(TOS[$3].valor, TOS[$5].valor);
 															TOS[$3].longitud =  TOS[$5].longitud;
 															TOS[$3].tipo_dato = $2;
-															
+
 														}  |
 			let SEP_SENT
 ;
@@ -1113,7 +1113,7 @@ static int nEstado[21][25] = {
 /*E5*/ {	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20},
 /*E6*/ {	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20},
 /*E7*/ {	NV,	NV,	NV,	NV,	NV,	NV,	20,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV,	NV},
-/*E8*/ {	20,	20,	20,	20,	20,	1,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20},
+/*E8*/ {	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20},
 /*E9*/ {	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20},
 /*E10*/ {	20,	11,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20},
 /*E11*/ {	20,	20,	20,	12,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20,	20},
@@ -1484,23 +1484,23 @@ int insertarTOS(int NroToken, const char * lexema)
 			strcpy(TOS[TOStop].nombre, lexema);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
-        case CTE_ENT:			
+        case CTE_ENT:
             strcpy(TOS[TOStop].tipo,"CTE_ENT");
             TOS[TOStop].tipo_dato = PR_INT;
-			sprintf(TOS[TOStop].nombre,"_CTE_ENT_%d",++cont_const_int);			
+			sprintf(TOS[TOStop].nombre,"_CTE_ENT_%d",++cont_const_int);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_REAL:
             strcpy(TOS[TOStop].tipo,"CTE_REAL");
             TOS[TOStop].tipo_dato = PR_REAL;
-			sprintf(TOS[TOStop].nombre,"_CTE_REAL_%d",++cont_const_real);			
+			sprintf(TOS[TOStop].nombre,"_CTE_REAL_%d",++cont_const_real);
 			strcpy(TOS[TOStop].valor, lexema);
             break;
         case CTE_STRING:
             strcpy(TOS[TOStop].tipo,"CTE_STRING");
             TOS[TOStop].tipo_dato = PR_STRING;
             TOS[TOStop].longitud = (strlen(auxStr));
-			sprintf(TOS[TOStop].nombre,"_CTE_STRING_%d",++cont_const_string);			
+			sprintf(TOS[TOStop].nombre,"_CTE_STRING_%d",++cont_const_string);
 			strcpy(TOS[TOStop].valor, auxStr);
             break;
     }
@@ -1791,7 +1791,7 @@ void imprimirPolacaInversa()
         getch();
         exit(1);
     }
-	
+
 	if ((archPolacaNumerada = fopen (ARCH_POLACA_NUMERADA, "w"))== NULL)
     {
         printf("No se puede generar el archivo de polaca numerada");
@@ -1802,7 +1802,7 @@ void imprimirPolacaInversa()
     int i;
 
     for (i=0; i<nroNodoPolaca; i++)
-    {		
+    {
         fprintf(archPolaca, "%s", polacaInversa[i].nodo.valor);
 		if(i<nroNodoPolaca-1)
 			 fprintf(archPolaca, ",");
@@ -1931,7 +1931,7 @@ void imprimirASM(){
     fprintf(archAssembler, ".STACK 200h ; bytes en el stack\n");
     fflush(archAssembler);
 	imprimirDatosASM();
-    
+
 }
 
 void imprimirDatosASM(){
@@ -1951,7 +1951,7 @@ void imprimirDatosASM(){
 
     fflush(archAssembler);
 
-    for (i=CANTPR; i<TOStop;  i++){        
+    for (i=CANTPR; i<TOStop;  i++){
 		if (strcmp(TOS[i].tipo, "ID") == 0){
 			strcpy(nombre, TOS[i].nombre);
 			strcpy(valor, "(?)");
@@ -1961,7 +1961,7 @@ void imprimirDatosASM(){
 			strcpy(valor, TOS[i].valor);
 			esCte = 1;
 		}
-		
+
 		if ( TOS[i].tipo_dato == PR_STRING )
 		{
 			if (esCte)
@@ -1973,20 +1973,20 @@ void imprimirDatosASM(){
 				fprintf(archAssembler, "\t%s db MAXTEXTSIZE dup (?), 0\n", nombre);
 			}
 		}
-		else    
+		else
 		{
 			fprintf(archAssembler, "\t%s dd %s\n", nombre, valor);
 		}
     }
 
-    fflush(archAssembler); 
+    fflush(archAssembler);
 
 	if(fclose(archAssembler)!=0)
     {
         printf("No se puede CERRAR el archivo de Assembler");
         getch();
         exit(1);
-    }	
+    }
 }
 
 

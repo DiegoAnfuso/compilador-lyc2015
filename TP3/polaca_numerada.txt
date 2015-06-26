@@ -241,7 +241,7 @@
 240 - 10
 241 - CMP
 242 - 351
-243 - BGE
+243 - BLE
 244 - se cumplen 2da condicion !
 245 - PUT
 246 - x
