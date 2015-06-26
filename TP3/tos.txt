@@ -1,52 +1,55 @@
 
------------------------------- TABLA DE  SIMBOLOS ------------------------------
-Nro	 | Nombre			 | Tipo	 | Valor	 | Longitud	 | Tipo_Dato 
-0     	 | DECLARE     			 | PR     	 |  	 | 0 	 | 0 
-1     	 | ENDDECLARE     			 | PR     	 |  	 | 0 	 | 0 
-2     	 | INT     			 | PR     	 |  	 | 0 	 | 0 
-3     	 | REAL     			 | PR     	 |  	 | 0 	 | 0 
-4     	 | STRING     			 | PR     	 |  	 | 0 	 | 0 
-5     	 | CONST     			 | PR     	 |  	 | 0 	 | 0 
-6     	 | WHILE     			 | PR     	 |  	 | 0 	 | 0 
-7     	 | LET     			 | PR     	 |  	 | 0 	 | 0 
-8     	 | IF     			 | PR     	 |  	 | 0 	 | 0 
-9     	 | QEqual     			 | PR     	 |  	 | 0 	 | 0 
-10     	 | ELSE     			 | PR     	 |  	 | 0 	 | 0 
-11     	 | ENDIF     			 | PR     	 |  	 | 0 	 | 0 
-12     	 | BEGIN     			 | PR     	 |  	 | 0 	 | 0 
-13     	 | END     			 | PR     	 |  	 | 0 	 | 0 
-14     	 | AND     			 | PR     	 |  	 | 0 	 | 0 
-15     	 | OR     			 | PR     	 |  	 | 0 	 | 0 
-16     	 | GET     			 | PR     	 |  	 | 0 	 | 0 
-17     	 | PUT     			 | PR     	 |  	 | 0 	 | 0 
-18     	 | NOT     			 | PR     	 |  	 | 0 	 | 0 
-19     	 | DEFAULT     			 | PR     	 |  	 | 0 	 | 0 
-20     	 | THEN     			 | PR     	 |  	 | 0 	 | 0 
-21     	 | a1     			 | ID     	 | a1 	 | 0 	 | 260 
-22     	 | a2     			 | ID     	 | a2 	 | 0 	 | 260 
-23     	 | a3     			 | ID     	 | a3 	 | 0 	 | 260 
-24     	 | a4     			 | ID     	 | a4 	 | 0 	 | 259 
-25     	 | a5     			 | ID     	 | a5 	 | 0 	 | 259 
-26     	 | s1     			 | ID     	 | s1 	 | 0 	 | 261 
-27     	 | s2     			 | ID     	 | s2 	 | 0 	 | 261 
-28     	 | 13.13     			 | CTE_REAL     	 | 13.13 	 | 0 	 | 260 
-29     	 | 1     			 | CTE_ENT     	 | 1 	 | 0 	 | 259 
-30     	 | 99.99     			 | CTE_REAL     	 | 99.99 	 | 0 	 | 260 
-31     	 | .88     			 | CTE_REAL     	 | .88 	 | 0 	 | 260 
-32     	 | 77.     			 | CTE_REAL     	 | 77. 	 | 0 	 | 260 
-33     	 | "abc"     			 | CTE_STRING     	 | abc 	 | 3 	 | 261 
-34     	 | c1     			 | CONST     	 | 99 	 | 0 	 | 259 
-35     	 | 99     			 | CTE_ENT     	 | 99 	 | 0 	 | 259 
-36     	 | c2     			 | CONST     	 | ejemplo constante 	 | 0 	 | 261 
-37     	 | "ejemplo constante"     			 | CTE_STRING     	 | ejemplo constante 	 | 17 	 | 261 
-38     	 | "Condicion simple"     			 | CTE_STRING     	 | Condicion simple 	 | 16 	 | 261 
-39     	 | 3     			 | CTE_ENT     	 | 3 	 | 0 	 | 259 
-40     	 | 2     			 | CTE_ENT     	 | 2 	 | 0 	 | 259 
-41     	 | 4.3     			 | CTE_REAL     	 | 4.3 	 | 0 	 | 260 
-42     	 | 2.111     			 | CTE_REAL     	 | 2.111 	 | 0 	 | 260 
-43     	 | 0     			 | CTE_ENT     	 | 0 	 | 0 	 | 259 
-44     	 | "4"     			 | CTE_STRING     	 | 4 	 | 1 	 | 261 
-45     	 | "5"     			 | CTE_STRING     	 | 5 	 | 1 	 | 261 
-46     	 | "8"     			 | CTE_STRING     	 | 8 	 | 1 	 | 261 
+------------------------------------------------- TABLA DE  SIMBOLOS -------------------------------------------------
+Nro  | Nombre                             | Tipo           | Valor                              | Longitud | Tipo_Dato 
+0    | DECLARE                            | PR             |                                    | 0        | 0 
+1    | ENDDECLARE                         | PR             |                                    | 0        | 0 
+2    | INT                                | PR             |                                    | 0        | 0 
+3    | REAL                               | PR             |                                    | 0        | 0 
+4    | STRING                             | PR             |                                    | 0        | 0 
+5    | CONST                              | PR             |                                    | 0        | 0 
+6    | WHILE                              | PR             |                                    | 0        | 0 
+7    | LET                                | PR             |                                    | 0        | 0 
+8    | IF                                 | PR             |                                    | 0        | 0 
+9    | QEqual                             | PR             |                                    | 0        | 0 
+10   | ELSE                               | PR             |                                    | 0        | 0 
+11   | ENDIF                              | PR             |                                    | 0        | 0 
+12   | BEGIN                              | PR             |                                    | 0        | 0 
+13   | END                                | PR             |                                    | 0        | 0 
+14   | AND                                | PR             |                                    | 0        | 0 
+15   | OR                                 | PR             |                                    | 0        | 0 
+16   | GET                                | PR             |                                    | 0        | 0 
+17   | PUT                                | PR             |                                    | 0        | 0 
+18   | NOT                                | PR             |                                    | 0        | 0 
+19   | DEFAULT                            | PR             |                                    | 0        | 0 
+20   | THEN                               | PR             |                                    | 0        | 0 
+21   | s3                                 | ID             | s3                                 | 0        | 261 
+22   | i                                  | ID             | i                                  | 0        | 259 
+23   | j                                  | ID             | j                                  | 0        | 259 
+24   | k                                  | ID             | k                                  | 0        | 259 
+25   | w                                  | ID             | w                                  | 0        | 259 
+26   | x                                  | ID             | x                                  | 0        | 259 
+27   | y                                  | ID             | y                                  | 0        | 259 
+28   | z                                  | ID             | z                                  | 0        | 259 
+29   | b                                  | ID             | b                                  | 0        | 260 
+30   | c                                  | ID             | c                                  | 0        | 260 
+31   | d                                  | ID             | d                                  | 0        | 260 
+32   | s1                                 | CONST          | prueba                             | 6        | 261 
+33   | _CTE_STRING_1                      | CTE_STRING     | prueba                             | 6        | 261 
+34   | s2                                 | CONST          | ciclo                              | 5        | 261 
+35   | _CTE_STRING_2                      | CTE_STRING     | ciclo                              | 5        | 261 
+36   | _CTE_ENT_1                         | CTE_ENT        | 5                                  | 0        | 259 
+37   | _CTE_ENT_2                         | CTE_ENT        | 10                                 | 0        | 259 
+38   | _CTE_ENT_3                         | CTE_ENT        | 3                                  | 0        | 259 
+39   | _CTE_ENT_4                         | CTE_ENT        | 2                                  | 0        | 259 
+40   | _CTE_ENT_5                         | CTE_ENT        | 1                                  | 0        | 259 
+41   | _CTE_ENT_6                         | CTE_ENT        | 0                                  | 0        | 259 
+42   | a                                  | CONST          | 2.5                                | 0        | 260 
+43   | _CTE_REAL_1                        | CTE_REAL       | 2.5                                | 0        | 260 
+44   | _CTE_STRING_3                      | CTE_STRING     | se cumple 1er condicion !          | 25       | 261 
+45   | _CTE_REAL_2                        | CTE_REAL       | 0.50                               | 0        | 260 
+46   | _CTE_STRING_4                      | CTE_STRING     | se cumplen 2da condicion !         | 26       | 261 
+47   | _CTE_ENT_7                         | CTE_ENT        | 4                                  | 0        | 259 
+48   | _CTE_STRING_5                      | CTE_STRING     | NO se cumple que i=j               | 20       | 261 
+49   | _CTE_STRING_6                      | CTE_STRING     | TODO SALIO BIEN!                   | 16       | 261 
 
------------------------------- TABLA DE  SIMBOLOS ------------------------------
+------------------------------------------------- TABLA DE  SIMBOLOS -------------------------------------------------

@@ -1,27 +1,76 @@
 DECLARE
-	(a:REAL, b:REAL, c:REAL, f:INT, j:INT, o:INT, k:INT, d:REAL)
+	(s3:STRING, i:INT, j:INT, k:INT, w:INT, x:INT, y:INT, z:INT, b:REAL, c:REAL, d:REAL)
 ENDDECLARE
-CONST REAL p := 2.0;
-CONST INT t := 20;
-CONST STRING u := "esto es una cadena de prueba";
-LET f: 2, k, b: 3.2, j, o:20 DEFAULT (5+2)*1;
-PUT d;
-b := a + 1;
-o:= QEqual(8+f*j, [j+4,20,f*(f-j)]);
-WHILE(a*7+b < b+c*4 OR b < 2.3) 
-	a := a + 1;
-	a := 0.0;
-	IF(j-8 < f*8+4 AND j*7 >= 88/2)
-	THEN
-		IF(c-8 < c+4 OR p*8 >= 2.5)
+
+
+--/ // // / / // / // / // ** ------ --/PRINT ("comentario doble")/--
+-
+--
+-
+---
+-
+--- // // / / / / / / // /
+/--
+
+
+--/ -------- PRUEBAS SIMPLES ------- /--
+
+--/ prueba concatenacion de cadenas /--
+CONST STRING s1:="prueba";
+CONST STRING s2:="ciclo";
+s3:=s1++s2;
+PUT s3;
+
+--/ prueba LET /--
+y:=5;
+z:=10;
+LET w:3+2,x:2*2*y,y,z DEFAULT y+w;
+
+--/ pruebas QEQUAL /--
+x:=QEqual(x+b,[(d-3)*2,3,3]);
+PUT x;
+x:=QEqual(2,[2,2,2,2,1]);
+PUT x;
+
+
+--/ --------- PRUEBAS ANIDADAS -------- /--
+i:=0;
+j:=0;
+k:=0;
+CONST REAL a:=2.5;
+WHILE(i<=5)
+	WHILE(j<=5)
+		IF ( i==j AND (i*j)<=10  )
 		THEN
-			c := 1.2 + 1.5;
+			PUT "se cumple 1er condicion !";
+			LET w:i*j,x:i+j,y:i/j,z DEFAULT i-j;
+			k:=0;
+			WHILE(k<j)
+				d:=a*b/c*(0.50+c);
+			END	
 		ELSE
-			k := t / 8;
+			IF ( i==j AND (i*j)<10 )
+			THEN
+				PUT "se cumplen 2da condicion !";
+				x:=QEqual(i,[(1+(1-1)),(2-(5-5*(5/5))*j*0),3,4,5,j]);
+			ELSE
+				IF ( NOT( i==j) )
+				THEN
+					PUT "NO se cumple que i=j";
+					k:=0;
+					WHILE(k<j)
+						k:=k+1;
+						s3:=s1++s2;
+					END	
+				ENDIF	
+			ENDIF
 		ENDIF
-	ELSE
-		d := d / 8 + b;
-	ENDIF
-	
+		i:=i+1;
+		WHILE(k<j)
+			d:=a+((b+c)-(c*d))/((b+c)-(c*d))*d;
+		END	
+	END
+	j:=j+1;
 END
 
+PUT "TODO SALIO BIEN!";
