@@ -502,6 +502,7 @@ int TOStop = 0;		  // ?ndice de la TOS
 
 //FUNCIONES ASSEMBLER
 void imprimirASM();
+void imprimirDatosASM();
 
 // FUNCIONES GENERALES
 void abrirCodigoFuente();
@@ -1522,7 +1523,7 @@ void mostrarTOS()
 
     fprintf(tos,"\n------------------------------------------------- TABLA DE  SIMBOLOS -------------------------------------------------\n");
 
-    fprintf(tos,"Nro  | Nombre\t\t\t\t\t\t\t  | Tipo\t\t   | Valor\t\t\t\t\t\t\t    | Longitud | Tipo_Dato \n");
+    fprintf(tos,"Nro  | Nombre                             | Tipo           | Valor                              | Longitud | Tipo_Dato \n");
     for (i=0; i<TOStop; i++)
     {
 		fprintf(tos,"%-4d | %-34s | %-14s | %-34s | %-8d | %d \n",i,TOS[i].nombre, TOS[i].tipo, TOS[i].valor, TOS[i].longitud, TOS[i].tipo_dato);
@@ -1912,8 +1913,7 @@ void insertarComparacionQequal(){
 
 FILE * archAssembler;
 
-void imprimirASM()
-{
+void imprimirASM(){
     if ((archAssembler = fopen (ARCH_ASM, "w"))== NULL)
     {
         printf("No se puede generar el archivo de Assembler");
@@ -1930,13 +1930,63 @@ void imprimirASM()
     fprintf(archAssembler, ".386\n");
     fprintf(archAssembler, ".STACK 200h ; bytes en el stack\n");
     fflush(archAssembler);
+	imprimirDatosASM();
+    
+}
 
-    if(fclose(archAssembler)!=0)
+void imprimirDatosASM(){
+    char valor[50];
+    char nombre[TAMTOKEN];
+    int esCte = 0;
+
+    int i;
+
+    //Inicio sección de datos y definición TAM para strings
+    fprintf(archAssembler, ".DATA ; comienzo de la zona de datos\n");
+    fprintf(archAssembler, "\tMAXTEXTSIZE equ 50\n");
+    fprintf(archAssembler, "\t__aux1__ dd (?) ; Variable auxiliar para calculos\n");
+    fprintf(archAssembler, "\t__aux2__ dd (?) ; Variable auxiliar para calculos\n");
+    fprintf(archAssembler, "\t__cond1__ db (?) ; Variable auxiliar para condiciones\n");
+    fprintf(archAssembler, "\t__cond2__ db (?) ; Variable auxiliar para condiciones\n");
+
+    fflush(archAssembler);
+
+    for (i=CANTPR; i<TOStop;  i++){        
+		if (strcmp(TOS[i].tipo, "ID") == 0){
+			strcpy(nombre, TOS[i].nombre);
+			strcpy(valor, "(?)");
+			esCte = 0;
+		} else {
+			strcpy(nombre, TOS[i].nombre);
+			strcpy(valor, TOS[i].valor);
+			esCte = 1;
+		}
+		
+		if ( TOS[i].tipo_dato == PR_STRING )
+		{
+			if (esCte)
+			{
+				fprintf(archAssembler, "\t%s db \"%s\", 0\n", nombre, valor);
+			}
+			else
+			{
+				fprintf(archAssembler, "\t%s db MAXTEXTSIZE dup (?), 0\n", nombre);
+			}
+		}
+		else    
+		{
+			fprintf(archAssembler, "\t%s dd %s\n", nombre, valor);
+		}
+    }
+
+    fflush(archAssembler); 
+
+	if(fclose(archAssembler)!=0)
     {
         printf("No se puede CERRAR el archivo de Assembler");
         getch();
         exit(1);
-    }
+    }	
 }
 
 
