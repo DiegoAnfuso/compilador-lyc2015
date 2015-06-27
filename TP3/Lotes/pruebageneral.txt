@@ -1,50 +1,76 @@
 DECLARE
-	(a1:REAL, a2:REAL, a3:REAL, a4:INT, a5:INT, s1:STRING, s2:STRING)
+	(s3:STRING, i:INT, j:INT, k:INT, w:INT, x:INT, y:INT, z:INT, b:REAL, c:REAL, d:REAL)
 ENDDECLARE
 
-WHILE( a1>a2 )
-	a1:=13.13;
+
+--/ // // / / // / // / // ** ------ --/PRINT ("comentario doble")/--
+-
+--
+-
+---
+-
+--- // // / / / / / / // /
+/--
+
+
+--/ -------- PRUEBAS SIMPLES ------- /--
+
+--/ prueba concatenacion de cadenas /--
+CONST STRING s1:="prueba";
+CONST STRING s2:="ciclo";
+s3:=s1++s2;
+PUT s3;
+
+--/ prueba LET /--
+y:=5;
+z:=10;
+LET w:3+2,x:2*2*y,y,z DEFAULT y+w;
+
+--/ pruebas QEQUAL /--
+x:=QEqual(x+b,[(d-3)*2,3,3]);
+PUT x;
+x:=QEqual(2,[2,2,2,2,1]);
+PUT x;
+
+
+--/ --------- PRUEBAS ANIDADAS -------- /--
+i:=0;
+j:=0;
+k:=0;
+CONST REAL a:=2.5;
+WHILE(i<=5)
+	WHILE(j<=5)
+		IF ( i==j AND (i*j)<=10  )
+		THEN
+			PUT "se cumple 1er condicion !";
+			LET w:i*j,x:i+j,y:i/j,z DEFAULT i-j;
+			k:=0;
+			WHILE(k<j)
+				d:=a*b/c*(0.50+c);
+			END	
+		ELSE
+			IF ( i==j AND (i*j)>10 )
+			THEN
+				PUT "se cumplen 2da condicion !";
+				x:=QEqual(i,[(1+(1-1)),(2-(5-5*(5/5))*j*0),3,4,5,j]);
+			ELSE
+				IF ( NOT( i==j) )
+				THEN
+					PUT "NO se cumple que i=j";
+					k:=0;
+					WHILE(k<j)
+						k:=k+1;
+						s3:=s1++s2;
+					END	
+				ENDIF	
+			ENDIF
+		ENDIF
+		i:=i+1;
+		WHILE(k<j)
+			d:=a+((b+c)-(c*d))/((b+c)-(c*d))*d;
+		END	
+	END
+	j:=j+1;
 END
 
-IF (a1==a2)
-THEN
-	a2:=a1+1;
-ELSE
-	a1:= a3;
-ENDIF
-
-a1 := 99.99;
-a2 := .88;
-a3 := 77.;
-a2:=a1;
-
-s1 := "abc";
-a2 := a1;
-s2 := s2++s1;
-
-CONST c1 := 99;
-CONST c2 :="ejemplo constante";
-
---/ comentario; /  ---/a/a-a///--- /--
-
-PUT "Condicion simple";
-GET s1;
-
-LET a4:3+2,a5:2*2,a3,a1:4.3/2.111,a5:0 DEFAULT a1+a2;
-
-a4:=QEqual (a1+a2, [(a3-3)*2,3,3]);
-
-IF(a1>a2)
-THEN 
-	PUT "1";
-ENDIF
-IF(a1>=a2) THEN PUT "2"; ENDIF
-IF(a1<a2) THEN PUT "3"; ENDIF
-IF(a1<=a2) THEN PUT "4"; ENDIF
-IF(a1==a2) THEN PUT "5"; ENDIF
-IF( NOT(a1==a2) ) THEN PUT "8"; ENDIF
-
---/
-IF( (a1==a2) AND (a2==a3) ) THEN PUT "6"; ENDIF
-IF( (a1==a2) OR (a2==a3) ) THEN PUT "7"; ENDIF
-/--
+PUT "TODO SALIO BIEN!";
