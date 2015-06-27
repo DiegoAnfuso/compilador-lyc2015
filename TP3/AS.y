@@ -1738,8 +1738,8 @@ int yylex() //FUNCION  QUE LEE HASTA FINAL DE TOKEN O EOF
 /*                      COMPONENTES DE LA POLACA INVERSA                      */
 /* -------------------------------------------------------------------------- */
 
-#define ARCH_POLACA "polaca.txt"
-#define ARCH_POLACA_NUMERADA "polaca_numerada.txt"
+#define ARCH_POLACA "intermedia.txt"
+#define ARCH_POLACA_NUMERADA "intermedia_numerada.txt"
 
 FILE * archPolaca;
 FILE * archPolacaNumerada;
@@ -1946,8 +1946,6 @@ void imprimirDatosASM(){
     fprintf(archAssembler, "\tMAXTEXTSIZE equ 50\n");
     fprintf(archAssembler, "\t__aux1__ dd (?) ; Variable auxiliar para calculos\n");
     fprintf(archAssembler, "\t__aux2__ dd (?) ; Variable auxiliar para calculos\n");
-    fprintf(archAssembler, "\t__cond1__ db (?) ; Variable auxiliar para condiciones\n");
-    fprintf(archAssembler, "\t__cond2__ db (?) ; Variable auxiliar para condiciones\n");
 
     fflush(archAssembler);
 
@@ -1966,11 +1964,11 @@ void imprimirDatosASM(){
 		{
 			if (esCte)
 			{
-				fprintf(archAssembler, "\t%s db \"%s\", 0\n", nombre, valor);
+				fprintf(archAssembler, "\t%s db \"%s\", '$'\n", nombre, valor);
 			}
 			else
 			{
-				fprintf(archAssembler, "\t%s db MAXTEXTSIZE dup (?), 0\n", nombre);
+				fprintf(archAssembler, "\t%s db MAXTEXTSIZE dup (?), '$'\n", nombre);
 			}
 		}
 		else
