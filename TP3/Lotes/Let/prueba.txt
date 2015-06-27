@@ -1,5 +1,5 @@
 DECLARE
-  (a:INT,b:INT,c:INT,d:INT,e:INT)
+  (a:INT,b:INT,c:INT,d:INT,e:INT,w:REAL,x:REAL,y:REAL,z:REAL)
 ENDDECLARE
 
 a:=1;
@@ -8,36 +8,11 @@ c:=2;
 d:=2;
 e:=2;
 
+w:=1.5;
+x:=2.5;
+y:=3.5;
+z:=4.5;
+
 LET a:3+2,b:2*2,c,d:4/2,e:6-2 DEFAULT a+b;
 
---/
-
-IF( a==5 )
-THEN
-  PUT "OK";
-ELSE
-PUT "ERROR";
-ENDIF
-
-IF( B==4 )
-THEN
-  PUT "OK";
-ELSE
-PUT "ERROR";
-ENDIF
-
-IF( C==2 )
-THEN
-  PUT "OK";
-ELSE
-PUT "ERROR";
-ENDIF
-
-IF( D==4 )
-THEN
-  PUT "OK";
-ELSE
-PUT "ERROR";
-ENDIF
-
-/--
+LET w:w+0.5,x:0.5*0.5-0.25*2+z/w,y:w+(w+0.5+(0.5+(0.5+(0.5)))),z DEFAULT (0.5*0.5-0.25*2+z/w)+1;

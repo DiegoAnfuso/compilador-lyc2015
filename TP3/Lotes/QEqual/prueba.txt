@@ -1,5 +1,5 @@
 DECLARE
-  (a:INT,b:INT,c:INT,d:INT,e:INT)
+  (a:INT,b:INT,c:INT,d:INT,e:INT,w:REAL,x:REAL,y:REAL,z:REAL)
 ENDDECLARE
 
 a:=1;
@@ -7,6 +7,11 @@ b:=2;
 c:=2;
 d:=2;
 e:=2;
+
+w:=2.5;
+x:=3.5;
+y:=4.5;
+z:=0.5;
 
 e:=QEqual(a+b,[(d-3)*2,3,3]);
 
@@ -27,3 +32,22 @@ IF( d == 1)
   ELSE
     PUT "ERROR";
 ENDIF
+
+e:=QEqual(w+x,[(w-3.5)*2.5,3.499,w+(w+0.5+(0.5+(0.5+(0.5))))]);
+
+IF( e >= 1)
+  THEN
+    PUT "SE ENCONTRO";
+  ELSE
+    PUT "NO SE ENCONTRO";
+ENDIF
+
+a:=QEqual(2.5,[w,w+(1.5+w+0.5)-(1.0*w)+0.5,(2.5+x)*0.5,(2.5+x)/2,2.499999]);
+
+IF( a >= 1)
+  THEN
+    PUT "SE ENCONTRO";
+  ELSE
+    PUT "NO SE ENCONTRO";
+ENDIF
+

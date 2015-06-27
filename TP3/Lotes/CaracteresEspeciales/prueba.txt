@@ -4,3 +4,8 @@ ENDDECLARE
 	PUT "carac especiales.: #%&";
 	var:="Mas ()*|~!@?{}[]-_";
 	GET var;
+	var:="Mas ()*|~!@?{}[]-_";
+	CONST STRING var2:=" y mas ()*|~!@?{}[]-_";
+	var:= var++var;
+	var:= var++"Mas ()*|~!@?{}[]-_";
+	var:= var++var2;

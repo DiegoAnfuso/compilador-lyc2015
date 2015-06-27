@@ -1,30 +1,41 @@
 DECLARE
-	(k:INT, j:INT, cont:INT, id1:INT, i:INT)
+	(k:INT, j:INT, i:INT, a:REAL, b:REAL, c:REAL, d:REAL, s3:STRING)
 ENDDECLARE
-	PUT "IFs y WHILE";
-	id1:=1;
-
-
-	WHILE(i<=5)
-		WHILE(j<=5)
-			IF (id1==1)
+CONST STRING s1:="prueba";
+CONST STRING s2:="ciclo";
+i:=0;
+j:=0;
+k:=0;
+a:=2.5;
+WHILE(i<=5)
+	WHILE(j<=5)
+		IF ( i==j AND (i*j)<=10  )
+		THEN
+			PUT "se cumple 1er condicion !";
+			k:=0;
+			WHILE(k<j)
+				d:=a*b/c*(0.50+c);
+			END	
+		ELSE
+			IF ( i==j AND (i*j)>10 )
 			THEN
-				PUT "IGUAL A 1";
+				PUT "se cumplen 2da condicion !";
 			ELSE
-				IF (id1==4)
+				IF ( NOT( i==j) )
 				THEN
-					PUT "IGUAL A 4";
-				ELSE
-					IF (id1==5)
-					THEN
-						PUT "IGUAL A 5";
-					ELSE
-						PUT "DIFERENTE";
-					ENDIF
-				ENDIF
+					PUT "NO se cumple que i=j";
+					k:=0;
+					WHILE(k<j)
+						k:=k+1;
+						s3:=s1++s2;
+					END	
+				ENDIF	
 			ENDIF
-
-			i:=i+1;
-		END
-		j:=j+1;
+		ENDIF
+		i:=i+1;
+		WHILE(k<j)
+			d:=a+((b+c)-(c*d))/((b+c)-(c*d))*d;
+		END	
 	END
+	j:=j+1;
+END

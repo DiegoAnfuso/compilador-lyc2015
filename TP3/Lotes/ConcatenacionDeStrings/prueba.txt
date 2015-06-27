@@ -7,6 +7,8 @@ ENDDECLARE
 	s2:="exitosa";
 	s3:=s1++s2;
 	PUT s3;
-	CONST STRING s4:="con constante";
+	CONST STRING s4:="con constante definida ";
 	s3:=s3++s4;
-	PUT s4;
+	PUT s3;
+	s3:=s3++"y constante string";
+		
