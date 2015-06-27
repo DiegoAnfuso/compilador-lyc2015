@@ -50,6 +50,12 @@ Nro  | Nombre                             | Tipo           | Valor              
 46   | _CTE_STRING_4                      | CTE_STRING     | se cumplen 2da condicion !         | 26       | 261 
 47   | _CTE_ENT_7                         | CTE_ENT        | 4                                  | 0        | 259 
 48   | _CTE_STRING_5                      | CTE_STRING     | NO se cumple que i=j               | 20       | 261 
-49   | _CTE_STRING_6                      | CTE_STRING     | TODO SALIO BIEN!                   | 16       | 261 
+49   | _CTE_REAL_3                        | CTE_REAL       | 5.5                                | 0        | 260 
+50   | _CTE_REAL_4                        | CTE_REAL       | .0                                 | 0        | 260 
+51   | _CTE_STRING_6                      | CTE_STRING     | MAYOR                              | 5        | 261 
+52   | _CTE_STRING_7                      | CTE_STRING     | MENOR                              | 5        | 261 
+53   | _CTE_REAL_5                        | CTE_REAL       | 0.25                               | 0        | 260 
+54   | _CTE_REAL_6                        | CTE_REAL       | 0.5                                | 0        | 260 
+55   | _CTE_STRING_8                      | CTE_STRING     | TODO SALIO BIEN!                   | 16       | 261 
 
 ------------------------------------------------- TABLA DE  SIMBOLOS -------------------------------------------------

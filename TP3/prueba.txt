@@ -73,4 +73,18 @@ WHILE(i<=5)
 	j:=j+1;
 END
 
+WHILE(d<5.5)
+	c:=.0;	
+	WHILE(c<5.5)
+		IF(c>2.5)
+		THEN
+			PUT "MAYOR";
+		ELSE
+			PUT "MENOR";
+		ENDIF
+		c:=c+0.25;
+	END
+		d:=d+0.5;
+END
+
 PUT "TODO SALIO BIEN!";

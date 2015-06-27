@@ -37,4 +37,10 @@ include number.asm		 ;incluye el asm para impresion de numeros
 	_CTE_STRING_4 db "se cumplen 2da condicion !", 0
 	_CTE_ENT_7 dd 4
 	_CTE_STRING_5 db "NO se cumple que i=j", 0
-	_CTE_STRING_6 db "TODO SALIO BIEN!", 0
+	_CTE_REAL_3 dd 5.5
+	_CTE_REAL_4 dd .0
+	_CTE_STRING_6 db "MAYOR", 0
+	_CTE_STRING_7 db "MENOR", 0
+	_CTE_REAL_5 dd 0.25
+	_CTE_REAL_6 dd 0.5
+	_CTE_STRING_8 db "TODO SALIO BIEN!", 0
