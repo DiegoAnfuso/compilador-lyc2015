@@ -70,7 +70,7 @@ int yyerror(char *s);
 YYSTYPE yylval, yyval;
 #define YYERRCODE 256
 
-# line 457 "AS.y"
+# line 439 "AS.y"
 
 
 /* -------------------------------------------------------------------------- */
@@ -1375,7 +1375,8 @@ int nroNodoPolaca = 0;
 int pilaSaltos[MAXLONG]; //NO SOPORTA MAS DE 30
 int indexPilaSaltos = 0;
 int posicionOperadorComparacion;
-int esCondicionMultiple = 0;
+int pilaEsCondicionMultiple[100];
+int indexPilaEsCondicionMultiple = 0;
 int posSaltoPrimeraCondicion = 0;
 int pilaOperadorLogico[100];
 int indexPilaOperadorLogico = 0;
@@ -1446,7 +1447,7 @@ void insertarNodoEnPolaca(int tipo, const nodoTS nodo)
 		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo;
 		polacaLetDefault[nroNodoPolacaLetDefault].nodo = nodo;
 		nroNodoPolacaLetDefault++;
-	} if(esPIVOT){
+	} else if(esPIVOT){
 		polacaPivot[nroNodoPolacaPivot].tipo = tipo;
 		polacaPivot[nroNodoPolacaPivot].nodo = nodo;
 		nroNodoPolacaPivot++;
@@ -1464,7 +1465,7 @@ void insertarValorEnPolaca(int tipo, const char * valor)
 		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo;
 		strcpy(polacaLetDefault[nroNodoPolacaLetDefault].nodo.valor, valor);
 		nroNodoPolacaLetDefault++;
-	} if(esPIVOT){
+	} else if(esPIVOT){
 		polacaPivot[nroNodoPolacaPivot].tipo = tipo;
 		strcpy(polacaPivot[nroNodoPolacaPivot].nodo.valor, valor);
 		nroNodoPolacaPivot++;
@@ -1636,7 +1637,7 @@ int main(int argc, char* argv[])
     cerrarCodigoFuente();
 
     if (error==0){
-		printf("\nCOMPILACION EXITOSA! %d\n",indexPilaSaltos);
+		printf("\nCOMPILACION EXITOSA! \n");
 		mostrarTOS();
 		imprimirPolacaInversa();
 	} else
@@ -2043,38 +2044,39 @@ int yyparse()
       															strcpy(TOS[yypvt[-3]].valor, TOS[yypvt[-1]].valor);
       															TOS[yypvt[-3]].longitud =  TOS[yypvt[-1]].longitud;
       															TOS[yypvt[-3]].tipo_dato = yypvt[-4];
-
-														} break;
+      															#ifdef MI_DEBUG
+      																printf("\nDeclaracion de constante con nombre\n");
+      															#endif
+      														} break;
       case 21:
-# line 99 "AS.y"
+# line 101 "AS.y"
       { esCONST = 1;} break;
       case 22:
-# line 102 "AS.y"
+# line 104 "AS.y"
       {
       										#ifdef MI_DEBUG
       											printf("\nAsignacion\n");
-      											printf("%s\n",buscarEnTOS(yypvt[-2]));
       										#endif
       										if(strcmp(TOS[yypvt[-2]].tipo,"CONST") == 0)
       											yyerror("No se puede realizar una asignacion a una constante con nombre.");
       										if(TOS[yypvt[-2]].tipo_dato != TOS[yypvt[-0]].tipo_dato)
       											yyerror("Tipos de dato incompatibles para la asignacion.");
-      										#ifdef MI_DEBUG
-      											printf(":=\n");
-      										#endif
       										insertarValorEnPolaca(1, ":=");
       									} break;
       case 23:
-# line 116 "AS.y"
+# line 114 "AS.y"
       {
       											if(TOS[yypvt[-2]].tipo_dato != PR_STRING)
       												yyerror("Solo se puede asignar una concatenacion a una variable STRING.");
+      											#ifdef MI_DEBUG
+      												printf("\nAsignacion\n");
+      											#endif
       										} break;
       case 24:
-# line 120 "AS.y"
+# line 121 "AS.y"
       {
       									#ifdef MI_DEBUG
-      										printf("\nQequal");
+      										printf("\nQequal\n");
       									#endif
       									if(TOS[yypvt[-2]].tipo_dato != PR_INT)
       										yyerror("Tipo de dato incompatible para la asignacion de QEqual");
@@ -2083,12 +2085,13 @@ int yyparse()
       										polacaInversa[pilaPosIdQequal[i]].nodo = TOS[yypvt[-2]];
       									}
       									indexPilaPosIdQequal = 0;
+      									nroNodoPolacaPivot = 0;
       								} break;
       case 25:
-# line 134 "AS.y"
+# line 136 "AS.y"
       {
       										#ifdef MI_DEBUG
-      											printf("++\n");
+      											printf("\nConcatenacion\n");
       										#endif
       										if(TOS[yypvt[-2]].tipo_dato != PR_STRING || TOS[yypvt[-0]].tipo_dato != PR_STRING)
       												yyerror("Solo se pueden concatenar tipo de dato STRING");
@@ -2098,14 +2101,14 @@ int yyparse()
       										insertarValorEnPolaca(1, ":=");
       									  } break;
       case 28:
-# line 149 "AS.y"
+# line 151 "AS.y"
       {
       																				#ifdef MI_DEBUG
       																					printf("\nSentencia IF\n");
       																				#endif
       																				int aux = pilaSaltos[--indexPilaSaltos];
       																				asignarSalto(aux, nroNodoPolaca);
-      																				if(esCondicionMultiple == 1){
+      																				if(pilaEsCondicionMultiple[--indexPilaEsCondicionMultiple] == 1){
       																					int aux2 = pilaSaltos[--indexPilaSaltos];
       																					if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
       																						asignarSalto(aux2, nroNodoPolaca);
@@ -2114,14 +2117,11 @@ int yyparse()
 
 																			} break;
       case 29:
-# line 163 "AS.y"
+# line 165 "AS.y"
       {
-      																		#ifdef MI_DEBUG
-      																			printf("\nFin del THEN\n");
-      																		#endif
       																		int aux = pilaSaltos[--indexPilaSaltos];
       																		asignarSalto(aux, nroNodoPolaca+2);
-      																		if(esCondicionMultiple == 1){
+      																		if(pilaEsCondicionMultiple[--indexPilaEsCondicionMultiple] == 1){
       																			int aux2 = pilaSaltos[--indexPilaSaltos];
       																			if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
       																				asignarSalto(aux2, nroNodoPolaca+2);
@@ -2132,62 +2132,54 @@ int yyparse()
       																		insertarValorEnPolaca(1, "BI");
       																	} break;
       case 30:
-# line 178 "AS.y"
+# line 177 "AS.y"
       {
       																										#ifdef MI_DEBUG
-      																											printf("\nFin del ELSE\n");
+      																											printf("\nSentencia IF\n");
       																										#endif
       																										int aux = pilaSaltos[--indexPilaSaltos];
       																										asignarSalto(aux, nroNodoPolaca);
       																									} break;
       case 31:
-# line 187 "AS.y"
+# line 186 "AS.y"
       {
       							#ifdef MI_DEBUG
       								printf("\nCondicion simple\n");
       							#endif
-      							esCondicionMultiple = 0;
+      							pilaEsCondicionMultiple[indexPilaEsCondicionMultiple++] = 0;
       						} break;
       case 34:
-# line 199 "AS.y"
+# line 198 "AS.y"
       {
-      											#ifdef MI_DEBUG
-      												printf("%s\n", operadorLogico);
-      											#endif
       											pilaOperadorLogico[indexPilaOperadorLogico++] = yypvt[-0];
       											if(yypvt[-0] == PR_OR){
       												invertirOperadorCondicional();
       												posSaltoPrimeraCondicion = nroNodoPolaca-2;
-      												#ifdef MI_DEBUG
-      													printf("%s\n", "Apilando salto para OR");
-      												#endif
       											}
       										} break;
       case 35:
-# line 213 "AS.y"
+# line 206 "AS.y"
       {
       														#ifdef MI_DEBUG
-      															printf("%s\n", operadorLogico);
+      															printf("\nCondicion multiple\n");
       														#endif
       														if(yypvt[-2] == PR_OR){
       															asignarSalto(posSaltoPrimeraCondicion, nroNodoPolaca);
-      															#ifdef MI_DEBUG
-      																printf("%s\n", "Asignando salto para OR");
-      															#endif
       														}
-      														esCondicionMultiple = 1;
+      														pilaEsCondicionMultiple[indexPilaEsCondicionMultiple++] = 1;
+
       													} break;
       case 36:
-# line 225 "AS.y"
+# line 216 "AS.y"
       {
       															#ifdef MI_DEBUG
-      																printf("NOT\n");
+      																printf("\nCondicion NOT\n");
       															#endif
       															invertirOperadorCondicional();
-      															esCondicionMultiple = 0;
+      															pilaEsCondicionMultiple[indexPilaEsCondicionMultiple++] = 0;
       														} break;
       case 37:
-# line 234 "AS.y"
+# line 225 "AS.y"
       {
       													if(TOS[yypvt[-2]].tipo_dato != TOS[yypvt[-0]].tipo_dato)
       														yyerror("Tipos de dato incompatibles para realizar una comparacion.");
@@ -2196,33 +2188,36 @@ int yyparse()
       													insertarValorEnPolaca(0, "");
       													posicionOperadorComparacion = nroNodoPolaca;
       													insertarValorEnPolaca(1, operadorCond);
+      													#ifdef MI_DEBUG
+      														printf("\nComparacion\n");
+      													#endif
       												} break;
       case 38:
-# line 245 "AS.y"
+# line 239 "AS.y"
       { strcpy(operadorCond, "BGE"); } break;
       case 39:
-# line 246 "AS.y"
+# line 240 "AS.y"
       { strcpy(operadorCond, "BGT"); } break;
       case 40:
-# line 247 "AS.y"
+# line 241 "AS.y"
       { strcpy(operadorCond, "BLE"); } break;
       case 41:
-# line 248 "AS.y"
+# line 242 "AS.y"
       { strcpy(operadorCond, "BLT"); } break;
       case 42:
-# line 249 "AS.y"
+# line 243 "AS.y"
       { strcpy(operadorCond, "BNE"); } break;
       case 43:
-# line 250 "AS.y"
+# line 244 "AS.y"
       { strcpy(operadorCond, "BEQ"); } break;
       case 44:
-# line 253 "AS.y"
+# line 247 "AS.y"
       { strcpy(operadorLogico, "AND"); } break;
       case 45:
-# line 254 "AS.y"
+# line 248 "AS.y"
       { strcpy(operadorLogico, "OR"); } break;
       case 46:
-# line 258 "AS.y"
+# line 252 "AS.y"
       {
       						#ifdef MI_DEBUG
       							printf("\nComienzo Iteracion WHILE\n");
@@ -2231,14 +2226,14 @@ int yyparse()
 						pilaSaltos[indexPilaSaltos++] = nroNodoPolaca;
       					} break;
       case 47:
-# line 264 "AS.y"
+# line 258 "AS.y"
       {
       																			#ifdef MI_DEBUG
       																				printf("\nFin Iteracion WHILE\n");
       																			#endif
       																			int aux = pilaSaltos[--indexPilaSaltos];
       																			asignarSalto(aux, nroNodoPolaca +2);
-      																			if(esCondicionMultiple == 1){
+      																			if(pilaEsCondicionMultiple[--indexPilaEsCondicionMultiple] == 1){
       																				int aux2 = pilaSaltos[--indexPilaSaltos];
       																				if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
       																					asignarSalto(aux2, nroNodoPolaca + 2);
@@ -2251,120 +2246,108 @@ int yyparse()
       																			insertarValorEnPolaca(1, "BI");
       																		} break;
       case 48:
-# line 284 "AS.y"
+# line 278 "AS.y"
       {
       						#ifdef MI_DEBUG
-      							printf("GET\n");
+      							printf("\nGET\n");
       						#endif
       						insertarValorEnPolaca(1, "GET");
       					} break;
       case 49:
-# line 292 "AS.y"
+# line 286 "AS.y"
       {
       						#ifdef MI_DEBUG
-      							printf("PUT\n");
+      							printf("\nPUT\n");
       						#endif
       						insertarValorEnPolaca(1, "PUT");
       					} break;
       case 50:
-# line 298 "AS.y"
+# line 292 "AS.y"
       {
       								#ifdef MI_DEBUG
-      									printf("PUT\n");
+      									printf("\nPUT\n");
       								#endif
       								insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
       								insertarValorEnPolaca(1, "PUT");
       							} break;
       case 51:
-# line 307 "AS.y"
+# line 301 "AS.y"
       {  tipo_dato = PR_STRING;
       					if(!esCONST)
       					{
-      						#ifdef MI_DEBUG
-      							printf("%s\n",buscarEnTOS(yypvt[-0]));
-      						#endif
       						insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
       					}
       				 } break;
       case 52:
-# line 316 "AS.y"
+# line 307 "AS.y"
       {   tipo_dato = PR_INT;
       						if(!esCONST)
       						{
-      							#ifdef MI_DEBUG
-      								printf("%s\n",buscarEnTOS(yypvt[-0]));
-      							#endif
       							insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
       						}
       					} break;
       case 53:
-# line 325 "AS.y"
+# line 313 "AS.y"
       {   tipo_dato = PR_REAL;
       								if(!esCONST)
       								{
-      									#ifdef MI_DEBUG
-      										printf("%s\n",buscarEnTOS(yypvt[-0]));
-      									#endif
       									insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
       								}
       				   } break;
       case 54:
-# line 336 "AS.y"
+# line 321 "AS.y"
       {
       											#ifdef MI_DEBUG
-      												printf("+\n");
+      												printf("\nSuma\n");
       											#endif
       											if(TOS[yypvt[-2]].tipo_dato == PR_STRING || TOS[yypvt[-0]].tipo_dato == PR_STRING)
       												yyerror("No es posible realizar una suma con un tipo de dato STRING");
       											insertarValorEnPolaca(1, "+");
       										} break;
       case 55:
-# line 344 "AS.y"
+# line 329 "AS.y"
       {
       												#ifdef MI_DEBUG
-      													printf("-\n");
+      													printf("\nResta\n");
       												#endif
       												if(TOS[yypvt[-2]].tipo_dato == PR_STRING || TOS[yypvt[-0]].tipo_dato == PR_STRING)
       													yyerror("No es posible realizar una resta con un tipo de dato STRING");
       												insertarValorEnPolaca(1, "-");
       											} break;
       case 57:
-# line 355 "AS.y"
+# line 340 "AS.y"
       {
       											#ifdef MI_DEBUG
-      												printf("*\n");
+      												printf("\nMultiplicacion\n");
       											#endif
       											if(TOS[yypvt[-2]].tipo_dato == PR_STRING || TOS[yypvt[-0]].tipo_dato == PR_STRING)
       												yyerror("No es posible realizar una multiplicacion con un tipo de dato STRING");
       											insertarValorEnPolaca(1, "*");
       										} break;
       case 58:
-# line 363 "AS.y"
+# line 348 "AS.y"
       {
       											#ifdef MI_DEBUG
-      												printf("/\n");
+      												printf("\nDivision\n");
       											#endif
       											if(TOS[yypvt[-2]].tipo_dato == PR_STRING || TOS[yypvt[-0]].tipo_dato == PR_STRING)
       												yyerror("No es posible realizar una division con un tipo de dato STRING");
       											insertarValorEnPolaca(1, "/");
       										} break;
       case 60:
-# line 374 "AS.y"
+# line 359 "AS.y"
       {
       											yyval = yypvt[-1];
       										} break;
       case 63:
-# line 381 "AS.y"
+# line 366 "AS.y"
       {
-      				#ifdef MI_DEBUG
-      					printf("%s\n",buscarEnTOS(yypvt[-0]));
-      				#endif
-      				if(!esCONST)
-      					insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
-      				yyval = yypvt[-0];
-      			} break;
+      			if(!esCONST)
+      				insertarNodoEnPolaca(0, TOS[yypvt[-0]]);
+      			yyval = yypvt[-0];
+      		} break;
       case 64:
-# line 391 "AS.y"
+# line 373 "AS.y"
       {
       								// INICIALIZA EL ID EN 0
       								insertarValorEnPolaca(0, "0");
@@ -2372,28 +2355,28 @@ int yyparse()
       								esPIVOT = 1;
       							} break;
       case 65:
-# line 396 "AS.y"
+# line 378 "AS.y"
       {
       											esPIVOT = 0;
       											insertarExpresionPivotQequal();
       										} break;
       case 67:
-# line 401 "AS.y"
+# line 383 "AS.y"
       {
       									insertarComparacionQequal();
       								} break;
       case 68:
-# line 403 "AS.y"
+# line 385 "AS.y"
       {
       																	insertarExpresionPivotQequal();
       																} break;
       case 69:
-# line 405 "AS.y"
+# line 387 "AS.y"
       {
       																				insertarComparacionQequal();
       																			} break;
       case 70:
-# line 410 "AS.y"
+# line 392 "AS.y"
       {
       													esLETDEFAULT = 0;
       													printf("\nLET\n");
@@ -2416,12 +2399,12 @@ int yyparse()
 
 												} break;
       case 71:
-# line 433 "AS.y"
+# line 415 "AS.y"
       {
       								esLETDEFAULT = 1;
       							} break;
       case 72:
-# line 439 "AS.y"
+# line 421 "AS.y"
       {
       							insertarValorEnPolaca(1, ":=");
       							if(TOS[yypvt[-2]].tipo_dato != TOS[yypvt[-0]].tipo_dato){
@@ -2429,7 +2412,7 @@ int yyparse()
       							}
       						} break;
       case 73:
-# line 445 "AS.y"
+# line 427 "AS.y"
       {
       									polacaIdLet[nroNodoPolacaIdLet].tipo = 0;
       									polacaIdLet[nroNodoPolacaIdLet].nodo = TOS[yypvt[-0]];

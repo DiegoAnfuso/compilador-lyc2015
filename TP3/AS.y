@@ -91,7 +91,9 @@ sentencia : asignacion SEP_SENT
 															strcpy(TOS[$3].valor, TOS[$5].valor);
 															TOS[$3].longitud =  TOS[$5].longitud;
 															TOS[$3].tipo_dato = $2;
-
+															#ifdef MI_DEBUG
+																printf("\nDeclaracion de constante con nombre\n");
+															#endif
 														}  |
 			let SEP_SENT
 ;
@@ -102,24 +104,23 @@ inicio_const: PR_CONST { esCONST = 1;}
 asignacion : id OP_ASIG expresion 	{
 										#ifdef MI_DEBUG
 											printf("\nAsignacion\n");
-											printf("%s\n",buscarEnTOS($1));
 										#endif
 										if(strcmp(TOS[$1].tipo,"CONST") == 0)
 											yyerror("No se puede realizar una asignacion a una constante con nombre.");
 										if(TOS[$1].tipo_dato != TOS[$3].tipo_dato)
 											yyerror("Tipos de dato incompatibles para la asignacion.");
-										#ifdef MI_DEBUG
-											printf(":=\n");
-										#endif
 										insertarValorEnPolaca(1, ":=");
 									}|
 			 id OP_ASIG concatenacion	{
 											if(TOS[$1].tipo_dato != PR_STRING)
 												yyerror("Solo se puede asignar una concatenacion a una variable STRING.");
+											#ifdef MI_DEBUG
+												printf("\nAsignacion\n");
+											#endif
 										}|
 			 id OP_ASIG qequal {
 									#ifdef MI_DEBUG
-										printf("\nQequal");
+										printf("\nQequal\n");
 									#endif
 									if(TOS[$1].tipo_dato != PR_INT)
 										yyerror("Tipo de dato incompatible para la asignacion de QEqual");
@@ -128,12 +129,13 @@ asignacion : id OP_ASIG expresion 	{
 										polacaInversa[pilaPosIdQequal[i]].nodo = TOS[$1];
 									}
 									indexPilaPosIdQequal = 0;
+									nroNodoPolacaPivot = 0;									
 								}
 ;
 
 concatenacion : cadena OP_CONCAT cadena {
 										#ifdef MI_DEBUG
-											printf("++\n");
+											printf("\nConcatenacion\n");
 										#endif
 										if(TOS[$1].tipo_dato != PR_STRING || TOS[$3].tipo_dato != PR_STRING)
 												yyerror("Solo se pueden concatenar tipo de dato STRING");
@@ -152,7 +154,7 @@ decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN 	sentencias PR_ENDIF 	{
 																				#endif
 																				int aux = pilaSaltos[--indexPilaSaltos];
 																				asignarSalto(aux, nroNodoPolaca);
-																				if(esCondicionMultiple == 1){
+																				if(pilaEsCondicionMultiple[--indexPilaEsCondicionMultiple] == 1){
 																					int aux2 = pilaSaltos[--indexPilaSaltos];
 																					if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
 																						asignarSalto(aux2, nroNodoPolaca);
@@ -161,12 +163,9 @@ decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN 	sentencias PR_ENDIF 	{
 
 																			}
 		|   PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN sentencias 	{
-																		#ifdef MI_DEBUG
-																			printf("\nFin del THEN\n");
-																		#endif
 																		int aux = pilaSaltos[--indexPilaSaltos];
 																		asignarSalto(aux, nroNodoPolaca+2);
-																		if(esCondicionMultiple == 1){
+																		if(pilaEsCondicionMultiple[--indexPilaEsCondicionMultiple] == 1){
 																			int aux2 = pilaSaltos[--indexPilaSaltos];
 																			if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
 																				asignarSalto(aux2, nroNodoPolaca+2);
@@ -177,7 +176,7 @@ decision : PR_IF OP_PABRE condicion OP_PCIERRA PR_THEN 	sentencias PR_ENDIF 	{
 																		insertarValorEnPolaca(1, "BI");
 																	} PR_ELSE sentencias PR_ENDIF	{
 																										#ifdef MI_DEBUG
-																											printf("\nFin del ELSE\n");
+																											printf("\nSentencia IF\n");
 																										#endif
 																										int aux = pilaSaltos[--indexPilaSaltos];
 																										asignarSalto(aux, nroNodoPolaca);
@@ -188,7 +187,7 @@ condicion : cond_simple {
 							#ifdef MI_DEBUG
 								printf("\nCondicion simple\n");
 							#endif
-							esCondicionMultiple = 0;
+							pilaEsCondicionMultiple[indexPilaEsCondicionMultiple++] = 0;
 						}
 			| cond_multiple
 ;
@@ -197,37 +196,29 @@ cond_simple : comparacion
 ;
 
 cond_multiple : comparacion op_logico	{
-											#ifdef MI_DEBUG
-												printf("%s\n", operadorLogico);
-											#endif
 											pilaOperadorLogico[indexPilaOperadorLogico++] = $2;
 											if($2 == PR_OR){
 												invertirOperadorCondicional();
 												posSaltoPrimeraCondicion = nroNodoPolaca-2;
-												#ifdef MI_DEBUG
-													printf("%s\n", "Apilando salto para OR");
-												#endif
 											}
 										}
 
 										comparacion {
 														#ifdef MI_DEBUG
-															printf("%s\n", operadorLogico);
+															printf("\nCondicion multiple\n");
 														#endif
 														if($2 == PR_OR){
 															asignarSalto(posSaltoPrimeraCondicion, nroNodoPolaca);
-															#ifdef MI_DEBUG
-																printf("%s\n", "Asignando salto para OR");
-															#endif
 														}
-														esCondicionMultiple = 1;
+														pilaEsCondicionMultiple[indexPilaEsCondicionMultiple++] = 1;
+														
 													}
 			|	PR_NOT OP_PABRE comparacion OP_PCIERRA 	{
 															#ifdef MI_DEBUG
-																printf("NOT\n");
+																printf("\nCondicion NOT\n");
 															#endif
 															invertirOperadorCondicional();
-															esCondicionMultiple = 0;
+															pilaEsCondicionMultiple[indexPilaEsCondicionMultiple++] = 0;
 														}
 ;
 
@@ -239,6 +230,9 @@ comparacion : expresion comparador expresion 	{
 													insertarValorEnPolaca(0, "");
 													posicionOperadorComparacion = nroNodoPolaca;
 													insertarValorEnPolaca(1, operadorCond);
+													#ifdef MI_DEBUG
+														printf("\nComparacion\n");
+													#endif
 												}
 ;
 
@@ -267,7 +261,7 @@ iteracion: PR_WHILE {
 																			#endif
 																			int aux = pilaSaltos[--indexPilaSaltos];
 																			asignarSalto(aux, nroNodoPolaca +2);
-																			if(esCondicionMultiple == 1){
+																			if(pilaEsCondicionMultiple[--indexPilaEsCondicionMultiple] == 1){
 																				int aux2 = pilaSaltos[--indexPilaSaltos];
 																				if(pilaOperadorLogico[--indexPilaOperadorLogico] == PR_AND){
 																					asignarSalto(aux2, nroNodoPolaca + 2);
@@ -283,7 +277,7 @@ iteracion: PR_WHILE {
 
 entrada: PR_GET id  {
 						#ifdef MI_DEBUG
-							printf("GET\n");
+							printf("\nGET\n");
 						#endif
 						insertarValorEnPolaca(1, "GET");
 					}
@@ -291,13 +285,13 @@ entrada: PR_GET id  {
 
 salida: PR_PUT id 	{
 						#ifdef MI_DEBUG
-							printf("PUT\n");
+							printf("\nPUT\n");
 						#endif
 						insertarValorEnPolaca(1, "PUT");
 					}
 		| PR_PUT CTE_STRING {
 								#ifdef MI_DEBUG
-									printf("PUT\n");
+									printf("\nPUT\n");
 								#endif
 								insertarNodoEnPolaca(0, TOS[$2]);
 								insertarValorEnPolaca(1, "PUT");
@@ -307,27 +301,18 @@ salida: PR_PUT id 	{
 cte : CTE_STRING {  tipo_dato = PR_STRING;
 					if(!esCONST)
 					{
-						#ifdef MI_DEBUG
-							printf("%s\n",buscarEnTOS($1));
-						#endif
 						insertarNodoEnPolaca(0, TOS[$1]);
 					}
 				 }
 				 | CTE_ENT  	{   tipo_dato = PR_INT;
 						if(!esCONST)
 						{
-							#ifdef MI_DEBUG
-								printf("%s\n",buscarEnTOS($1));
-							#endif
 							insertarNodoEnPolaca(0, TOS[$1]);
 						}
 					}
 				| CTE_REAL 	{   tipo_dato = PR_REAL;
 								if(!esCONST)
 								{
-									#ifdef MI_DEBUG
-										printf("%s\n",buscarEnTOS($1));
-									#endif
 									insertarNodoEnPolaca(0, TOS[$1]);
 								}
 				   }
@@ -335,7 +320,7 @@ cte : CTE_STRING {  tipo_dato = PR_STRING;
 
 expresion : expresion OP_SUMA termino 	{
 											#ifdef MI_DEBUG
-												printf("+\n");
+												printf("\nSuma\n");
 											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una suma con un tipo de dato STRING");
@@ -343,7 +328,7 @@ expresion : expresion OP_SUMA termino 	{
 										}
 			| expresion OP_RESTA termino 	{
 												#ifdef MI_DEBUG
-													printf("-\n");
+													printf("\nResta\n");
 												#endif
 												if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 													yyerror("No es posible realizar una resta con un tipo de dato STRING");
@@ -354,7 +339,7 @@ expresion : expresion OP_SUMA termino 	{
 
 termino : termino OP_MULTIPLI factor 	{
 											#ifdef MI_DEBUG
-												printf("*\n");
+												printf("\nMultiplicacion\n");
 											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una multiplicacion con un tipo de dato STRING");
@@ -362,7 +347,7 @@ termino : termino OP_MULTIPLI factor 	{
 										}
 		| termino OP_DIVISION factor 	{
 											#ifdef MI_DEBUG
-												printf("/\n");
+												printf("\nDivision\n");
 											#endif
 											if(TOS[$1].tipo_dato == PR_STRING || TOS[$3].tipo_dato == PR_STRING)
 												yyerror("No es posible realizar una division con un tipo de dato STRING");
@@ -379,13 +364,10 @@ factor : OP_PABRE expresion OP_PCIERRA 	{
 ;
 
 id : ID {
-				#ifdef MI_DEBUG
-					printf("%s\n",buscarEnTOS($1));
-				#endif
-				if(!esCONST)
-					insertarNodoEnPolaca(0, TOS[$1]);
-				$$ = $1;
-			}
+			if(!esCONST)
+				insertarNodoEnPolaca(0, TOS[$1]);
+			$$ = $1;
+		}
 ;
 
 qequal : PR_QEQUAL OP_PABRE {
@@ -1758,7 +1740,8 @@ int nroNodoPolaca = 0;
 int pilaSaltos[MAXLONG]; //NO SOPORTA MAS DE 30
 int indexPilaSaltos = 0;
 int posicionOperadorComparacion;
-int esCondicionMultiple = 0;
+int pilaEsCondicionMultiple[100];
+int indexPilaEsCondicionMultiple = 0;
 int posSaltoPrimeraCondicion = 0;
 int pilaOperadorLogico[100];
 int indexPilaOperadorLogico = 0;
@@ -1829,7 +1812,7 @@ void insertarNodoEnPolaca(int tipo, const nodoTS nodo)
 		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo;
 		polacaLetDefault[nroNodoPolacaLetDefault].nodo = nodo;
 		nroNodoPolacaLetDefault++;
-	} if(esPIVOT){
+	} else if(esPIVOT){
 		polacaPivot[nroNodoPolacaPivot].tipo = tipo;
 		polacaPivot[nroNodoPolacaPivot].nodo = nodo;
 		nroNodoPolacaPivot++;
@@ -1847,7 +1830,7 @@ void insertarValorEnPolaca(int tipo, const char * valor)
 		polacaLetDefault[nroNodoPolacaLetDefault].tipo = tipo;
 		strcpy(polacaLetDefault[nroNodoPolacaLetDefault].nodo.valor, valor);
 		nroNodoPolacaLetDefault++;
-	} if(esPIVOT){
+	} else if(esPIVOT){
 		polacaPivot[nroNodoPolacaPivot].tipo = tipo;
 		strcpy(polacaPivot[nroNodoPolacaPivot].nodo.valor, valor);
 		nroNodoPolacaPivot++;
@@ -2019,7 +2002,7 @@ int main(int argc, char* argv[])
     cerrarCodigoFuente();
 
     if (error==0){
-		printf("\nCOMPILACION EXITOSA! %d\n",indexPilaSaltos);
+		printf("\nCOMPILACION EXITOSA! \n");
 		mostrarTOS();
 		imprimirPolacaInversa();
 	} else

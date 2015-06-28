@@ -40,7 +40,7 @@ k:=0;
 CONST REAL a:=2.5;
 WHILE(i<=5)
 	WHILE(j<=5)
-		IF ( i==j AND (i*j)<=10  )
+		IF ( i==j OR (i*j)<=10  )
 		THEN
 			PUT "se cumple 1er condicion !";
 			LET w:i*j,x:i+j,y:i/j,z DEFAULT i-j;
