@@ -53,3 +53,5 @@ WHILE(i<=5)
 		d:=d+0.5;
 	END
 END
+
+PUT "FIN";
